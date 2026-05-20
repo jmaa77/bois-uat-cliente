@@ -1,0 +1,1166 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bois Bourgeois — Prueba de la app antes del lanzamiento</title>
+<style>
+  :root {
+    --primary: #0a3d62;
+    --primary-dark: #062840;
+    --accent: #f4b740;
+    --ok: #2e7d32;
+    --ok-bg: #e8f5e9;
+    --fail: #c62828;
+    --fail-bg: #ffebee;
+    --skip: #616161;
+    --skip-bg: #eeeeee;
+    --pending: #9e9e9e;
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #e0e0e0;
+    --text: #212121;
+    --text-soft: #616161;
+    --shadow: 0 1px 3px rgba(0,0,0,.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header.cover {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 32px 20px;
+    text-align: center;
+  }
+  header.cover h1 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 600;
+  }
+  header.cover p {
+    margin: 0;
+    opacity: .9;
+    font-size: 15px;
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  section.intro, section.summary, section.howto {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  section.intro h2 { color: var(--primary); margin-top: 0; }
+  section.intro ul, section.howto ul, section.howto ol { padding-left: 20px; }
+  section.intro li, section.howto li { margin-bottom: 6px; }
+  .info-box {
+    background: #fff8e1;
+    border-left: 4px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .info-box strong { color: var(--primary-dark); }
+
+  /* Identidad */
+  .identity {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .identity label { display: block; font-size: 13px; color: var(--text-soft); margin-bottom: 4px; }
+  .identity input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 14px;
+  }
+  @media (max-width: 540px) { .identity { grid-template-columns: 1fr; } }
+
+  /* Progreso */
+  .progress-card {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .chip.ok { background: var(--ok-bg); color: var(--ok); }
+  .chip.fail { background: var(--fail-bg); color: var(--fail); }
+  .chip.skip { background: var(--skip-bg); color: var(--skip); }
+  .chip.pending { background: #f5f5f5; color: var(--pending); }
+  .progress-bar-wrap { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+  .progress-bar-fill { height: 100%; background: var(--primary); transition: width .3s; }
+
+  /* Bloques + pasos */
+  .block { margin: 24px 0 8px; }
+  .block-title {
+    color: var(--primary);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent);
+  }
+  .step-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--pending);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+  }
+  .step-card.is-ok { border-left-color: var(--ok); }
+  .step-card.is-fail { border-left-color: var(--fail); }
+  .step-card.is-skip { border-left-color: var(--skip); }
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .step-number {
+    background: var(--primary);
+    color: white;
+    font-weight: 700;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .step-title { font-weight: 600; font-size: 16px; flex: 1; }
+  .step-status-chip {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+  .step-status-chip.ok { background: var(--ok-bg); color: var(--ok); }
+  .step-status-chip.fail { background: var(--fail-bg); color: var(--fail); }
+  .step-status-chip.skip { background: var(--skip-bg); color: var(--skip); }
+  .step-status-chip.pending { background: #f5f5f5; color: var(--pending); }
+
+  .step-body { padding-left: 38px; }
+  .what-to-do, .what-to-see {
+    margin: 10px 0;
+  }
+  .what-to-do strong, .what-to-see strong {
+    display: block;
+    color: var(--primary-dark);
+    font-size: 13px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+  }
+  .what-to-do p, .what-to-see p { margin: 4px 0; }
+  .mockup {
+    background: #f8f9fb;
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 10px 0;
+    text-align: center;
+  }
+  .mockup-caption {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .mockup svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+
+  /* Status buttons */
+  .status-row {
+    display: flex;
+    gap: 8px;
+    margin: 14px 0 8px;
+    flex-wrap: wrap;
+  }
+  .status-btn {
+    border: 1px solid var(--border);
+    background: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all .15s;
+  }
+  .status-btn:hover { background: #f5f5f5; }
+  .status-btn.active.ok { background: var(--ok); color: white; border-color: var(--ok); }
+  .status-btn.active.fail { background: var(--fail); color: white; border-color: var(--fail); }
+  .status-btn.active.skip { background: var(--skip); color: white; border-color: var(--skip); }
+
+  /* Notas + evidencia */
+  textarea.notes {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font: inherit;
+    font-size: 14px;
+    min-height: 70px;
+    resize: vertical;
+    margin-bottom: 8px;
+    background: white;
+  }
+  textarea.notes:focus { outline: none; border-color: var(--primary); }
+  .evidence-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-soft);
+    margin-bottom: 6px;
+    margin-top: 8px;
+  }
+  .paste-zone {
+    background: #f8f9fb;
+    border: 2px dashed var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-soft);
+    cursor: text;
+    transition: all .15s;
+  }
+  .paste-zone:focus, .paste-zone.focused {
+    outline: none;
+    border-color: var(--primary);
+    background: #f0f4f8;
+    color: var(--primary);
+  }
+  .file-input { display: none; }
+  .upload-link {
+    color: var(--primary);
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 600;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .gallery .thumb {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f5f5f5;
+    border: 1px solid var(--border);
+  }
+  .gallery .thumb img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    cursor: pointer;
+    display: block;
+  }
+  .gallery .thumb .del {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0,0,0,.7);
+    color: white;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.9);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 20px;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox img { max-width: 95vw; max-height: 95vh; object-fit: contain; }
+
+  /* Footer / export */
+  section.summary {
+    text-align: center;
+    background: var(--primary);
+    color: white;
+    border: none;
+  }
+  section.summary h2 { color: white; margin-top: 0; }
+  .big-btn {
+    background: var(--accent);
+    color: var(--primary-dark);
+    border: none;
+    padding: 14px 32px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 8px 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2);
+    transition: transform .1s;
+  }
+  .big-btn:hover { transform: translateY(-1px); }
+  .secondary-btn {
+    background: rgba(255,255,255,.15);
+    color: white;
+    border: 1px solid rgba(255,255,255,.3);
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 4px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--ok);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    z-index: 1100;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all .25s;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* HowTo */
+  section.howto {
+    background: #f5f9fc;
+    border-color: #c5d9e8;
+  }
+  section.howto h2 { color: var(--primary); margin-top: 0; }
+  .template-box {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  code { background: #f5f5f5; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  kbd {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <h1>Bois Bourgeois — Prueba antes del lanzamiento</h1>
+  <p>Gracias por ayudarnos a probar la app antes de abrirla al público</p>
+</header>
+
+<main>
+
+<!-- ============ INTRO ============ -->
+<section class="intro">
+  <h2>¿Qué es esto?</h2>
+  <p>Antes de lanzar Bois Bourgeois al público, queremos asegurarnos de que <strong>todo funcione bien para vos como cliente</strong>. Te vamos a pedir que hagas algunas tareas comunes (registrarte, buscar prendas, marcar favoritos, etc.) y nos cuentes cómo te fue.</p>
+
+  <p><strong>No hay respuestas correctas o incorrectas.</strong> Tu opinión sincera nos ayuda a encontrar problemas antes de que los vea cualquier otra persona.</p>
+
+  <div class="info-box">
+    <strong>⏱ Tiempo estimado:</strong> 30 a 45 minutos. Podés tomarte pausas — el archivo guarda automáticamente tu progreso.<br>
+    <strong>💻 Necesitás:</strong> Una computadora con un navegador moderno (Chrome, Firefox, Edge o Safari) y acceso a internet.<br>
+    <strong>📧 Vas a usar:</strong> Tu correo electrónico (real) para crear una cuenta. Te llegará un mensaje de verificación.
+  </div>
+
+  <h3>Tus datos (para el reporte)</h3>
+  <p>Por favor completá estos campos antes de empezar:</p>
+  <div class="identity">
+    <div>
+      <label for="tester-name">Tu nombre</label>
+      <input type="text" id="tester-name" placeholder="Ej: Juan Pérez">
+    </div>
+    <div>
+      <label for="tester-email">Tu correo</label>
+      <input type="email" id="tester-email" placeholder="Ej: juan@ejemplo.com">
+    </div>
+    <div>
+      <label for="tester-browser">¿Qué navegador usás?</label>
+      <input type="text" id="tester-browser" placeholder="Ej: Chrome en Windows, Safari en Mac">
+    </div>
+    <div>
+      <label for="tester-date">Fecha de la prueba</label>
+      <input type="date" id="tester-date">
+    </div>
+  </div>
+
+  <div class="progress-card">
+    <div>
+      <span class="chip ok">✓ <span id="count-ok">0</span> funcionaron</span>
+      <span class="chip fail">✗ <span id="count-fail">0</span> con problemas</span>
+      <span class="chip skip">— <span id="count-skip">0</span> no probados</span>
+      <span class="chip pending">○ <span id="count-pending">0</span> pendientes</span>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+</section>
+
+<!-- ============ HOWTO ============ -->
+<section class="howto">
+  <h2>Antes de empezar — Cómo usar esta guía</h2>
+  <ol>
+    <li><strong>Abrí la app de Bois Bourgeois</strong> en otra pestaña del navegador. La dirección te la pasamos por separado.</li>
+    <li><strong>Mantené esta guía abierta</strong> en otra pestaña — vas a ir mirando lo que tenés que hacer.</li>
+    <li>Para cada paso:
+      <ul>
+        <li>Leé qué tenés que hacer en la app.</li>
+        <li>Hacelo en la otra pestaña.</li>
+        <li>Volvé acá y marcá si <strong>✓ Funcionó</strong>, <strong>✗ Algo salió mal</strong>, o <strong>— No lo probé</strong>.</li>
+        <li>Si algo salió mal: escribí qué pasó y pegá una captura (te explicamos cómo abajo).</li>
+      </ul>
+    </li>
+    <li>Cuando termines (o si querés pausar), clickeá <strong>⬇ Descargar reporte</strong> y mandanos el archivo que se descarga.</li>
+  </ol>
+
+  <h3>📸 Cómo pegar una captura de pantalla</h3>
+  <p>Si encontraste algo raro, una captura nos ayuda muchísimo:</p>
+  <ol>
+    <li>En Windows: apretá <kbd>Win</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd>, seleccioná lo que querés capturar, soltá. (En Mac: <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>4</kbd>.)</li>
+    <li>Volvé a esta guía, clickeá adentro del recuadro que dice <em>"Pegar evidencia"</em> en el paso correspondiente.</li>
+    <li>Apretá <kbd>Ctrl</kbd> + <kbd>V</kbd> (Mac: <kbd>Cmd</kbd> + <kbd>V</kbd>). La imagen aparece debajo.</li>
+  </ol>
+  <p>Si no podés con captura, alcanza con que escribas en el textarea qué pasó.</p>
+
+  <h3>📝 Cuando reportes un problema, intentá decir:</h3>
+  <div class="template-box">
+    QUÉ HICE: (ej: "Hice click en el botón Suscribirme")<br>
+    QUÉ ESPERABA VER: (ej: "Pensé que se abría un formulario de tarjeta")<br>
+    QUÉ PASÓ EN REALIDAD: (ej: "La página se quedó cargando 30 segundos y después dijo error")
+  </div>
+</section>
+
+<!-- ============ STEPS CONTAINER ============ -->
+<div id="steps-container"></div>
+
+<!-- ============ FINAL SECTION ============ -->
+<section class="summary">
+  <h2>¡Listo! ¿Cómo nos enviás tu reporte?</h2>
+  <p>Clickeá el botón grande y se descarga un archivo a tu computadora. Después subilo a la carpeta de Google Drive que te compartimos (o mandánoslo por correo).</p>
+  <button class="big-btn" onclick="exportJSON()">⬇ Descargar reporte</button>
+  <div style="margin-top:16px;">
+    <button class="secondary-btn" onclick="document.getElementById('import-file').click()">↑ Cargar reporte anterior</button>
+    <input type="file" id="import-file" class="file-input" accept="application/json" onchange="importJSON(this)">
+    <button class="secondary-btn" onclick="resetAll()">⟲ Empezar de nuevo</button>
+  </div>
+  <p style="font-size:13px; opacity:.8; margin-top:20px;">💡 <strong>Tip:</strong> Si necesitás cerrar la guía y volver después, no te preocupes — tu progreso queda guardado en este navegador. Si cambiás de navegador o computadora, primero <em>descargá el reporte</em> y después en la otra máquina abrí esta guía y <em>cargá el reporte anterior</em>.</p>
+</section>
+
+</main>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" alt="">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+// ============================================================================
+// MOCKUPS (SVG inline) — ilustraciones simples de lo que el cliente debería ver
+// ============================================================================
+const MOCKUPS = {
+  cookieBanner: `
+    <svg viewBox="0 0 360 130" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="130" fill="#fff" stroke="#ddd"/>
+      <rect x="80" y="30" width="200" height="80" rx="6" fill="#fffbeb" stroke="#f4b740" stroke-width="2"/>
+      <text x="180" y="55" font-family="sans-serif" font-size="11" fill="#5a4a1a" text-anchor="middle" font-weight="600">Política de Cookies</text>
+      <text x="180" y="73" font-family="sans-serif" font-size="9" fill="#5a4a1a" text-anchor="middle">Este sitio utiliza cookies necesarias</text>
+      <text x="180" y="85" font-family="sans-serif" font-size="9" fill="#5a4a1a" text-anchor="middle">para su funcionamiento.</text>
+      <rect x="148" y="92" width="64" height="20" rx="3" fill="#0a3d62"/>
+      <text x="180" y="106" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">Aceptar</text>
+    </svg>
+  `,
+
+  loginForm: `
+    <svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="200" fill="#fafafa"/>
+      <rect x="80" y="20" width="200" height="160" rx="6" fill="#fff" stroke="#ddd"/>
+      <text x="180" y="42" font-family="sans-serif" font-size="14" fill="#0a3d62" text-anchor="middle" font-weight="700">Crear cuenta</text>
+      <rect x="100" y="60" width="160" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="108" y="75" font-family="sans-serif" font-size="10" fill="#999">Tu correo electrónico</text>
+      <rect x="100" y="92" width="160" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="108" y="107" font-family="sans-serif" font-size="10" fill="#999">Contraseña</text>
+      <rect x="100" y="124" width="160" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="108" y="139" font-family="sans-serif" font-size="10" fill="#999">Repetir contraseña</text>
+      <rect x="100" y="154" width="160" height="22" rx="3" fill="#0a3d62"/>
+      <text x="180" y="170" font-family="sans-serif" font-size="11" fill="#fff" text-anchor="middle" font-weight="600">Crear cuenta</text>
+    </svg>
+  `,
+
+  searchBar: `
+    <svg viewBox="0 0 360 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="80" fill="#fff" stroke="#ddd"/>
+      <text x="14" y="22" font-family="sans-serif" font-size="13" fill="#0a3d62" font-weight="700">BOIS BOURGEOIS</text>
+      <rect x="120" y="30" width="180" height="26" rx="13" fill="#fafafa" stroke="#ccc"/>
+      <circle cx="135" cy="43" r="5" fill="none" stroke="#999" stroke-width="1.5"/>
+      <line x1="139" y1="47" x2="143" y2="51" stroke="#999" stroke-width="1.5"/>
+      <text x="150" y="47" font-family="sans-serif" font-size="11" fill="#999">Buscar...</text>
+      <text x="310" y="47" font-family="sans-serif" font-size="11" fill="#0a3d62" font-weight="600">Planes</text>
+    </svg>
+  `,
+
+  clothCard: `
+    <svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="200" fill="#fafafa"/>
+      <g>
+        <rect x="40" y="20" width="120" height="160" rx="6" fill="#fff" stroke="#ddd"/>
+        <rect x="50" y="30" width="100" height="100" fill="#e0e7ee"/>
+        <text x="100" y="84" font-family="sans-serif" font-size="10" fill="#999" text-anchor="middle">[foto de prenda]</text>
+        <text x="50" y="148" font-family="sans-serif" font-size="11" fill="#212121" font-weight="600">Camisa rayada</text>
+        <text x="50" y="161" font-family="sans-serif" font-size="10" fill="#666">Marca XYZ</text>
+        <text x="50" y="174" font-family="sans-serif" font-size="11" fill="#0a3d62" font-weight="700">$ 18.500</text>
+        <circle cx="143" cy="35" r="9" fill="#fff" stroke="#ddd"/>
+        <path d="M 138 33 a 3 3 0 0 1 5 -1.5 a 3 3 0 0 1 5 1.5 c 0 3 -5 6 -5 6 s -5 -3 -5 -6 z" fill="#c62828"/>
+      </g>
+      <g>
+        <rect x="200" y="20" width="120" height="160" rx="6" fill="#fff" stroke="#ddd"/>
+        <rect x="210" y="30" width="100" height="100" fill="#e0e7ee"/>
+        <text x="260" y="84" font-family="sans-serif" font-size="10" fill="#999" text-anchor="middle">[foto de prenda]</text>
+        <text x="210" y="148" font-family="sans-serif" font-size="11" fill="#212121" font-weight="600">Jean clásico</text>
+        <text x="210" y="161" font-family="sans-serif" font-size="10" fill="#666">Otra Marca</text>
+        <text x="210" y="174" font-family="sans-serif" font-size="11" fill="#0a3d62" font-weight="700">$ 24.000</text>
+        <circle cx="303" cy="35" r="9" fill="#fff" stroke="#ddd"/>
+        <path d="M 298 33 a 3 3 0 0 1 5 -1.5 a 3 3 0 0 1 5 1.5 c 0 3 -5 6 -5 6 s -5 -3 -5 -6 z" fill="none" stroke="#666" stroke-width="1"/>
+      </g>
+      <text x="180" y="195" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">⬆ el corazón rojo = ya marcado favorito | el corazón vacío = aún no</text>
+    </svg>
+  `,
+
+  limitReachedModal: `
+    <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="220" fill="rgba(0,0,0,.4)"/>
+      <rect x="50" y="40" width="260" height="150" rx="8" fill="#fff" stroke="#ddd"/>
+      <text x="180" y="68" font-family="sans-serif" font-size="14" fill="#c62828" text-anchor="middle" font-weight="700">⚠ Alcanzaste el límite</text>
+      <text x="180" y="93" font-family="sans-serif" font-size="11" fill="#444" text-anchor="middle">Llegaste al tope de visualizaciones del</text>
+      <text x="180" y="108" font-family="sans-serif" font-size="11" fill="#444" text-anchor="middle">plan Free este mes (10/10).</text>
+      <text x="180" y="128" font-family="sans-serif" font-size="11" fill="#444" text-anchor="middle">Suscribite a Plus para uso ilimitado.</text>
+      <rect x="80" y="148" width="90" height="28" rx="4" fill="#fff" stroke="#bbb"/>
+      <text x="125" y="166" font-family="sans-serif" font-size="11" fill="#666" text-anchor="middle">Más tarde</text>
+      <rect x="190" y="148" width="90" height="28" rx="4" fill="#0a3d62"/>
+      <text x="235" y="166" font-family="sans-serif" font-size="11" fill="#fff" text-anchor="middle" font-weight="600">Suscribirme a Plus</text>
+    </svg>
+  `,
+
+  gaugeBars: `
+    <svg viewBox="0 0 360 230" xmlns="http://www.w3.org/2000/svg">
+      <text x="180" y="20" font-family="sans-serif" font-size="11" fill="#666" text-anchor="middle">Tu uso este mes:</text>
+
+      <g>
+        <text x="20" y="50" font-family="sans-serif" font-size="11" fill="#212121" font-weight="600">Verde (todo OK):</text>
+        <rect x="20" y="58" width="320" height="14" rx="7" fill="#eee"/>
+        <rect x="20" y="58" width="100" height="14" rx="7" fill="#2e7d32"/>
+        <text x="340" y="69" font-family="sans-serif" font-size="10" fill="#666" text-anchor="end">30%</text>
+      </g>
+
+      <g>
+        <text x="20" y="108" font-family="sans-serif" font-size="11" fill="#212121" font-weight="600">Amarillo (cerca del límite):</text>
+        <rect x="20" y="116" width="320" height="14" rx="7" fill="#eee"/>
+        <rect x="20" y="116" width="256" height="14" rx="7" fill="#f4b740"/>
+        <text x="340" y="127" font-family="sans-serif" font-size="10" fill="#666" text-anchor="end">80%</text>
+      </g>
+
+      <g>
+        <text x="20" y="166" font-family="sans-serif" font-size="11" fill="#212121" font-weight="600">Rojo (alcanzaste el límite):</text>
+        <rect x="20" y="174" width="320" height="14" rx="7" fill="#eee"/>
+        <rect x="20" y="174" width="320" height="14" rx="7" fill="#c62828"/>
+        <text x="340" y="185" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="end" font-weight="600">100%</text>
+      </g>
+
+      <text x="180" y="215" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">La barra cambia de color a medida que usás la app</text>
+    </svg>
+  `,
+
+  pricingTabs: `
+    <svg viewBox="0 0 360 230" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="230" fill="#fafafa"/>
+      <text x="180" y="24" font-family="sans-serif" font-size="14" fill="#0a3d62" text-anchor="middle" font-weight="700">Planes</text>
+
+      <g>
+        <line x1="40" y1="50" x2="320" y2="50" stroke="#ddd"/>
+        <text x="100" y="44" font-family="sans-serif" font-size="11" fill="#0a3d62" text-anchor="middle" font-weight="600">Usuario</text>
+        <line x1="60" y1="49" x2="140" y2="49" stroke="#0a3d62" stroke-width="2"/>
+        <text x="260" y="44" font-family="sans-serif" font-size="11" fill="#999" text-anchor="middle">Marca</text>
+      </g>
+
+      <g>
+        <rect x="120" y="70" width="120" height="130" rx="6" fill="#fff" stroke="#ddd"/>
+        <text x="180" y="92" font-family="sans-serif" font-size="13" fill="#0a3d62" text-anchor="middle" font-weight="700">Plus</text>
+        <text x="180" y="110" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">Búsquedas ilimitadas</text>
+        <text x="180" y="123" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">en el catálogo</text>
+        <text x="180" y="148" font-family="sans-serif" font-size="16" fill="#212121" text-anchor="middle" font-weight="700">$ 9.000</text>
+        <text x="180" y="161" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">por mes</text>
+        <rect x="135" y="172" width="90" height="22" rx="4" fill="#0a3d62"/>
+        <text x="180" y="187" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">Suscribirme</text>
+      </g>
+
+      <text x="180" y="220" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">⬆ Si entrás sin cuenta, vas a ver las dos pestañas (Usuario / Marca)</text>
+    </svg>
+  `,
+
+  warningBanner: `
+    <svg viewBox="0 0 360 100" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="100" fill="#fafafa"/>
+      <rect x="30" y="20" width="300" height="60" rx="6" fill="#fff8e1" stroke="#f4b740" stroke-width="2"/>
+      <text x="50" y="42" font-family="sans-serif" font-size="14" fill="#5a4a1a" font-weight="700">⚠</text>
+      <text x="70" y="44" font-family="sans-serif" font-size="11" fill="#5a4a1a" font-weight="600">Estás cerca del límite</text>
+      <text x="70" y="58" font-family="sans-serif" font-size="10" fill="#5a4a1a">Llevás 8 de 10 visualizaciones este mes.</text>
+      <rect x="208" y="50" width="100" height="22" rx="4" fill="#0a3d62"/>
+      <text x="258" y="65" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">Suscribirme a Plus</text>
+    </svg>
+  `,
+
+  adPlaceholder: `
+    <svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="200" fill="rgba(0,0,0,.4)"/>
+      <rect x="50" y="25" width="260" height="150" rx="8" fill="#fff"/>
+      <text x="180" y="48" font-family="sans-serif" font-size="13" fill="#999" text-anchor="middle">Patrocinado</text>
+      <rect x="80" y="60" width="200" height="60" rx="4" fill="#fafafa" stroke="#ccc" stroke-dasharray="4 3"/>
+      <text x="180" y="86" font-family="sans-serif" font-size="11" fill="#999" text-anchor="middle">📣  Tu plan Free incluye una</text>
+      <text x="180" y="100" font-family="sans-serif" font-size="11" fill="#999" text-anchor="middle">visualización patrocinada</text>
+      <rect x="80" y="135" width="90" height="28" rx="4" fill="#fff" stroke="#bbb"/>
+      <text x="125" y="153" font-family="sans-serif" font-size="11" fill="#666" text-anchor="middle">Suscribirme</text>
+      <rect x="190" y="135" width="90" height="28" rx="4" fill="#0a3d62"/>
+      <text x="235" y="153" font-family="sans-serif" font-size="11" fill="#fff" text-anchor="middle" font-weight="600">Continuar</text>
+    </svg>
+  `,
+
+  profileMenu: `
+    <svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="200" fill="#fafafa"/>
+      <rect x="40" y="20" width="280" height="160" rx="6" fill="#fff" stroke="#ddd"/>
+      <text x="180" y="44" font-family="sans-serif" font-size="14" fill="#0a3d62" text-anchor="middle" font-weight="700">Mi Cuenta</text>
+      <line x1="60" y1="58" x2="300" y2="58" stroke="#eee"/>
+      <text x="70" y="80" font-family="sans-serif" font-size="11" fill="#212121">Perfil</text>
+      <text x="70" y="102" font-family="sans-serif" font-size="11" fill="#0a3d62" font-weight="600">Suscripción</text>
+      <line x1="65" y1="106" x2="120" y2="106" stroke="#0a3d62" stroke-width="2"/>
+      <text x="70" y="124" font-family="sans-serif" font-size="11" fill="#212121">Favoritos</text>
+      <text x="70" y="146" font-family="sans-serif" font-size="11" fill="#212121">Configuración</text>
+      <text x="180" y="170" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">⬆ La pestaña "Suscripción" muestra tu barra de uso</text>
+    </svg>
+  `,
+};
+
+// ============================================================================
+// PASOS DE LA PRUEBA
+// ============================================================================
+const STEPS = [
+  // ----- BLOCK A: COMENZAR -----
+  { id: 1, block: 'Comenzar a usar la app', n: 1,
+    title: 'Entrar al sitio',
+    doStr: 'Abrí la dirección que te pasamos en una pestaña nueva del navegador. Esperá que cargue la página principal.',
+    seeStr: 'Deberías ver el sitio con el logo "BOIS BOURGEOIS" arriba, una barra para buscar prendas, y abajo algunas prendas sugeridas (fotos con precios).',
+    mockup: 'searchBar',
+    mockupCaption: 'Así se ve la parte de arriba del sitio',
+  },
+  { id: 2, block: 'Comenzar a usar la app', n: 2,
+    title: 'Aceptar la política de cookies',
+    doStr: 'Al entrar por primera vez aparece un cartelito chico abajo o en el medio de la pantalla que pregunta por las cookies. Clickeá "Aceptar".',
+    seeStr: 'El cartel desaparece y podés seguir navegando.',
+    mockup: 'cookieBanner',
+    mockupCaption: 'El cartel se ve aproximadamente así',
+  },
+  { id: 3, block: 'Comenzar a usar la app', n: 3,
+    title: 'Crear tu cuenta',
+    doStr: 'Buscá un botón o link que diga "Ingresar" o "Crear cuenta" (suele estar arriba a la derecha). Clickealo y elegí "Crear cuenta" o "Registrarse". Completá el formulario con tu correo real, una contraseña, etc. Confirmá.',
+    seeStr: 'Vas a ver un mensaje que dice algo así como "Te enviamos un correo de verificación". Revisá tu casilla de mail (puede caer en spam).',
+    mockup: 'loginForm',
+    mockupCaption: 'El formulario de creación de cuenta',
+  },
+  { id: 4, block: 'Comenzar a usar la app', n: 4,
+    title: 'Verificar tu correo',
+    doStr: 'Abrí el correo que te llegó de Bois Bourgeois y clickeá el botón o link "Verificar correo". Esto activa tu cuenta.',
+    seeStr: 'El link te lleva a una página que dice "Email verified successfully" o algo parecido. Si dice "invalid or expired", el link expiró y tenés que pedir uno nuevo.',
+  },
+  { id: 5, block: 'Comenzar a usar la app', n: 5,
+    title: 'Iniciar sesión',
+    doStr: 'Volvé al sitio principal. Buscá "Ingresar" o "Login" arriba a la derecha. Ingresá tu correo y contraseña.',
+    seeStr: 'Tu nombre o usuario debería aparecer arriba a la derecha (en vez del botón "Ingresar"). Esto significa que estás logueado.',
+  },
+
+  // ----- BLOCK B: EXPLORAR -----
+  { id: 6, block: 'Explorar el catálogo', n: 6,
+    title: 'Buscar una prenda',
+    doStr: 'Tipeá una palabra en la barra de búsqueda de arriba (por ejemplo: "jean", "remera", "camisa"). Apretá Enter o el botón de la lupa.',
+    seeStr: 'Aparecen prendas que coinciden con lo que buscaste. Cada prenda muestra una foto, el nombre, la marca y el precio.',
+    mockup: 'clothCard',
+    mockupCaption: 'Cada prenda se ve aproximadamente así',
+  },
+  { id: 7, block: 'Explorar el catálogo', n: 7,
+    title: 'Usar los filtros',
+    doStr: 'En la página de búsqueda, fijate si hay opciones de filtro (talle, color, temperatura, precio, categoría). Cambiá al menos uno o dos.',
+    seeStr: 'Los resultados se actualizan automáticamente según el filtro que cambiaste.',
+  },
+
+  // ----- BLOCK C: INTERACTUAR -----
+  { id: 8, block: 'Marcar prendas que te gusten', n: 8,
+    title: 'Marcar una prenda como favorita',
+    doStr: 'Pasá el cursor encima de una prenda. Vas a ver un ícono de corazón. Clickealo.',
+    seeStr: 'El corazón cambia de color (se llena de rojo, o lo que sea), indicando que la prenda quedó guardada en tus favoritos.',
+    mockup: 'clothCard',
+    mockupCaption: 'El corazón rojo (izquierda) significa marcada favorita',
+  },
+  { id: 9, block: 'Marcar prendas que te gusten', n: 9,
+    title: 'Ver tus favoritos',
+    doStr: 'Buscá un menú "Mi cuenta" o "Perfil" (arriba a la derecha donde aparece tu nombre). Entrá ahí y buscá la sección "Favoritos".',
+    seeStr: 'La prenda que marcaste debería aparecer en la lista.',
+  },
+  { id: 10, block: 'Marcar prendas que te gusten', n: 10,
+    title: 'Ir al sitio de la marca para comprar',
+    doStr: 'Volvé a una prenda. Buscá un botón o link que diga "Ver en la marca" o que tenga un ícono de "abrir afuera" (↗). Clickealo.',
+    seeStr: 'Se abre en otra pestaña el sitio web de la marca donde podrías comprar esa prenda.',
+  },
+
+  // ----- BLOCK D: AVISOS DEL SISTEMA -----
+  { id: 11, block: 'Avisos del sistema (limites)', n: 11,
+    title: 'Probar el aviso "cerca del límite"',
+    doStr: 'Hacé click en "Ver en la marca" varias veces (en distintas prendas). Después de unos cuantos clicks (entre 6 y 8 aprox), debería aparecerte un cartel naranja/amarillo.',
+    seeStr: 'El cartel dice algo como "Estás cerca del límite" con un botón "Suscribirme a Plus". Es un aviso amistoso, no te bloquea todavía.',
+    mockup: 'warningBanner',
+    mockupCaption: 'Así se ve el aviso de "cerca del límite"',
+  },
+  { id: 12, block: 'Avisos del sistema (limites)', n: 12,
+    title: 'Probar el aviso "límite alcanzado"',
+    doStr: 'Seguí haciendo click en "Ver en la marca" hasta llegar a 10 visualizaciones en total. En la próxima debería aparecer una ventana con borde rojo.',
+    seeStr: 'La ventana dice "Alcanzaste el límite" con un botón "Suscribirme a Plus". Esta vez sí te bloquea la próxima visualización hasta que te suscribas o pase tiempo.',
+    mockup: 'limitReachedModal',
+    mockupCaption: 'Así se ve la ventana de "límite alcanzado"',
+  },
+  { id: 13, block: 'Avisos del sistema (limites)', n: 13,
+    title: 'Ver tu barra de uso en tu perfil',
+    doStr: 'Andá a tu perfil (arriba a la derecha) y buscá la sección "Suscripción". Mirá la barra que muestra cuánto usaste de tu plan.',
+    seeStr: 'La barra debería estar roja (si llegaste al 100%) o amarilla (si estás cerca del límite). Verde si todavía no llegaste al 60%.',
+    mockup: 'gaugeBars',
+    mockupCaption: 'Los 3 colores posibles de la barra',
+  },
+
+  // ----- BLOCK E: PLANES -----
+  { id: 14, block: 'Ver planes y suscripción', n: 14,
+    title: 'Ver la página de planes',
+    doStr: 'Clickeá en "Planes" en el menú de arriba. Si no aparece, intentá ir a la dirección + "/pricing" (por ejemplo: tudominio.com/pricing).',
+    seeStr: 'Aparecen los planes disponibles. Si entrás logueado como usuario, vas a ver el plan "Plus" ($9.000/mes). Si entrás sin cuenta o navegás como anónimo, vas a ver dos pestañas: "Usuario" y "Marca".',
+    mockup: 'pricingTabs',
+    mockupCaption: 'La página de planes con las dos pestañas',
+  },
+  { id: 15, block: 'Ver planes y suscripción', n: 15,
+    title: 'Probar de suscribirte (opcional, no es necesario completar el pago)',
+    doStr: 'Clickeá el botón "Suscribirme" o "Suscribirme a Plus". Se abre una nueva pestaña con un formulario de Mercado Pago para ingresar tarjeta. NO completes el pago, solo verificá que se abre el formulario.',
+    seeStr: 'Se abre una pestaña nueva con el logo de Mercado Pago y un formulario para datos de tarjeta. Eso indica que la integración con Mercado Pago funciona. Podés cerrar la pestaña sin pagar.',
+  },
+
+  // ----- BLOCK F: EXTRA -----
+  { id: 16, block: 'Cosas extra', n: 16,
+    title: 'Probar la "publicidad" antes de ir a la marca (si te tocó)',
+    doStr: 'Durante las pruebas de visualizaciones (paso 11-12), después de unos clicks puede aparecer una ventana con la palabra "Patrocinado" antes de ir al sitio de la marca. Si te apareció, contanos cómo te resultó.',
+    seeStr: 'Una ventana centrada con un cartel "Patrocinado" + un botón "Continuar" que abre el sitio de la marca, o "Suscribirme" para evitar las publicidades.',
+    mockup: 'adPlaceholder',
+    mockupCaption: 'La ventana "Patrocinado" debería verse así (o muy parecido)',
+  },
+  { id: 17, block: 'Cosas extra', n: 17,
+    title: 'Navegar en otro idioma (opcional)',
+    doStr: 'Buscá un selector de idioma (suele estar en el footer o en el menú). Cambialo a Inglés o Francés. Mirá si los textos cambian de idioma correctamente.',
+    seeStr: 'Los textos visibles (menús, botones, mensajes) cambian al idioma seleccionado. Si ves algunos textos que NO se traducen, anotanos cuáles.',
+  },
+];
+
+// ============================================================================
+// State management
+// ============================================================================
+const STORAGE_KEY = 'bois-uat-cliente-v1';
+
+function emptyState() {
+  return {
+    version: 1,
+    meta: {
+      tester_name: '', tester_email: '', tester_browser: '', tester_date: '',
+      started_at: new Date().toISOString(),
+      last_saved_at: null,
+    },
+    steps: Object.fromEntries(
+      STEPS.map(s => [s.id, { status: 'pending', notes: '', images: [] }])
+    ),
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return emptyState();
+    const parsed = JSON.parse(raw);
+    const empty = emptyState();
+    for (const id of Object.keys(empty.steps)) {
+      if (!parsed.steps[id]) parsed.steps[id] = empty.steps[id];
+    }
+    return parsed;
+  } catch (e) {
+    return emptyState();
+  }
+}
+
+function saveState() {
+  state.meta.last_saved_at = new Date().toISOString();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    toast('No se pudo guardar — el archivo está demasiado lleno. Descargá el reporte y empezá de nuevo.', 'err');
+  }
+}
+
+let state = loadState();
+
+// ============================================================================
+// Render
+// ============================================================================
+function renderAll() {
+  document.getElementById('tester-name').value = state.meta.tester_name || '';
+  document.getElementById('tester-email').value = state.meta.tester_email || '';
+  document.getElementById('tester-browser').value = state.meta.tester_browser || '';
+  document.getElementById('tester-date').value = state.meta.tester_date || '';
+
+  const container = document.getElementById('steps-container');
+  container.innerHTML = '';
+  let currentBlock = null;
+  for (const step of STEPS) {
+    if (step.block !== currentBlock) {
+      currentBlock = step.block;
+      const blockDiv = document.createElement('div');
+      blockDiv.className = 'block';
+      blockDiv.innerHTML = `<h2 class="block-title">${escapeHtml(step.block)}</h2>`;
+      container.appendChild(blockDiv);
+    }
+    container.appendChild(renderStep(step));
+  }
+  updateSummary();
+}
+
+function renderStep(step) {
+  const s = state.steps[step.id];
+  const card = document.createElement('div');
+  card.className = `step-card is-${s.status}`;
+  card.dataset.stepId = step.id;
+
+  const mockupHtml = step.mockup
+    ? `<div class="mockup">${MOCKUPS[step.mockup] || ''}<div class="mockup-caption">${escapeHtml(step.mockupCaption || '')}</div></div>`
+    : '';
+
+  card.innerHTML = `
+    <div class="step-head">
+      <span class="step-number">${escapeHtml(String(step.n))}</span>
+      <span class="step-title">${escapeHtml(step.title)}</span>
+      <span class="step-status-chip ${s.status}">${statusLabel(s.status)}</span>
+    </div>
+    <div class="step-body">
+      <div class="what-to-do">
+        <strong>👉 Qué tenés que hacer</strong>
+        <p>${escapeHtml(step.doStr)}</p>
+      </div>
+      <div class="what-to-see">
+        <strong>👁 Qué deberías ver</strong>
+        <p>${escapeHtml(step.seeStr)}</p>
+      </div>
+      ${mockupHtml}
+      <div class="status-row">
+        <button class="status-btn ${s.status === 'ok' ? 'active ok' : ''}" onclick="setStatus(${step.id}, 'ok')">✓ Funcionó</button>
+        <button class="status-btn ${s.status === 'fail' ? 'active fail' : ''}" onclick="setStatus(${step.id}, 'fail')">✗ Algo salió mal</button>
+        <button class="status-btn ${s.status === 'skip' ? 'active skip' : ''}" onclick="setStatus(${step.id}, 'skip')">— No lo probé</button>
+      </div>
+      <textarea class="notes"
+        placeholder="¿Algo para contarnos? Si algo salió mal, contanos qué pasó (qué hiciste, qué esperabas, qué viste). Si todo OK, podés dejarlo vacío."
+        oninput="updateNotes(${step.id}, this.value)">${escapeHtml(s.notes || '')}</textarea>
+      <div class="evidence-label">📸 ¿Tenés una captura para mostrarnos?</div>
+      <div class="paste-zone" tabindex="0"
+           onclick="this.focus()"
+           onfocus="this.classList.add('focused')"
+           onblur="this.classList.remove('focused')"
+           onpaste="handlePaste(event, ${step.id})">
+        Clickeá acá y apretá <kbd>Ctrl</kbd>+<kbd>V</kbd> para pegar — o
+        <span class="upload-link" onclick="event.stopPropagation();document.getElementById('file-${step.id}').click()">elegí un archivo</span>
+      </div>
+      <input type="file" id="file-${step.id}" class="file-input" accept="image/*" multiple
+             onchange="handleFileUpload(event, ${step.id})">
+      <div class="gallery" id="gallery-${step.id}">${renderGallery(step.id)}</div>
+    </div>
+  `;
+  return card;
+}
+
+function renderGallery(stepId) {
+  const imgs = state.steps[stepId].images || [];
+  return imgs.map((img, i) => `
+    <div class="thumb">
+      <img src="${img}" alt="captura ${i+1}" onclick="openLightbox('${stepId}',${i})">
+      <button class="del" onclick="deleteImage(${stepId},${i})" title="Eliminar">✕</button>
+    </div>
+  `).join('');
+}
+
+function rerenderGallery(stepId) {
+  const el = document.getElementById('gallery-' + stepId);
+  if (el) el.innerHTML = renderGallery(stepId);
+}
+
+function rerenderStepCard(stepId) {
+  const old = document.querySelector(`.step-card[data-step-id="${stepId}"]`);
+  if (!old) return;
+  const step = STEPS.find(s => s.id === stepId);
+  if (!step) return;
+  const fresh = renderStep(step);
+  old.replaceWith(fresh);
+}
+
+function statusLabel(st) {
+  return {
+    ok: '✓ Funcionó',
+    fail: '✗ Con problemas',
+    skip: '— No probado',
+    pending: '○ Pendiente',
+  }[st];
+}
+
+// ============================================================================
+// Mutations
+// ============================================================================
+function setStatus(stepId, status) {
+  state.steps[stepId].status = status;
+  saveState();
+  rerenderStepCard(stepId);
+  updateSummary();
+}
+
+function updateNotes(stepId, value) {
+  state.steps[stepId].notes = value;
+  saveState();
+}
+
+function handlePaste(e, stepId) {
+  const items = (e.clipboardData || window.clipboardData).items;
+  let found = false;
+  for (const item of items) {
+    if (item.type && item.type.startsWith('image/')) {
+      found = true;
+      e.preventDefault();
+      const file = item.getAsFile();
+      readFileAsDataURL(file).then(dataUrl => {
+        state.steps[stepId].images.push(dataUrl);
+        saveState();
+        rerenderGallery(stepId);
+        toast('Captura agregada');
+      });
+    }
+  }
+  if (!found) toast('No se encontró una imagen para pegar', 'err');
+}
+
+function handleFileUpload(e, stepId) {
+  const files = Array.from(e.target.files || []);
+  Promise.all(files.map(readFileAsDataURL)).then(urls => {
+    state.steps[stepId].images.push(...urls);
+    saveState();
+    rerenderGallery(stepId);
+    toast(`${urls.length} imagen(es) agregadas`);
+  });
+  e.target.value = '';
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+function deleteImage(stepId, idx) {
+  if (!confirm('¿Eliminar esta imagen?')) return;
+  state.steps[stepId].images.splice(idx, 1);
+  saveState();
+  rerenderGallery(stepId);
+}
+
+// Identity inputs
+['tester-name', 'tester-email', 'tester-browser', 'tester-date'].forEach((id) => {
+  document.getElementById(id).addEventListener('input', (e) => {
+    state.meta[id.replace('tester-', 'tester_')] = e.target.value;
+    saveState();
+  });
+});
+
+// ============================================================================
+// Summary + progress
+// ============================================================================
+function updateSummary() {
+  const counts = { ok: 0, fail: 0, skip: 0, pending: 0 };
+  for (const id of Object.keys(state.steps)) {
+    const st = state.steps[id].status;
+    counts[st] = (counts[st] || 0) + 1;
+  }
+  document.getElementById('count-ok').textContent = counts.ok;
+  document.getElementById('count-fail').textContent = counts.fail;
+  document.getElementById('count-skip').textContent = counts.skip;
+  document.getElementById('count-pending').textContent = counts.pending;
+  const done = counts.ok + counts.fail + counts.skip;
+  const pct = STEPS.length === 0 ? 0 : Math.round((done / STEPS.length) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+// ============================================================================
+// Lightbox
+// ============================================================================
+function openLightbox(stepId, idx) {
+  const img = state.steps[stepId].images[idx];
+  document.getElementById('lightbox-img').src = img;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+// ============================================================================
+// Export / Import / Reset
+// ============================================================================
+function exportJSON() {
+  // Validación blanda: avisar si nombre o email vacíos
+  if (!state.meta.tester_name && !state.meta.tester_email) {
+    if (!confirm('No completaste tu nombre ni tu correo arriba. ¿Querés descargar el reporte igual?')) return;
+  }
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const tsRaw = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const nameSlug = (state.meta.tester_name || 'anonimo').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'anonimo';
+  a.href = url;
+  a.download = `bois-prueba-${nameSlug}-${tsRaw}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Reporte descargado a tu carpeta de Descargas');
+}
+
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const parsed = JSON.parse(r.result);
+      if (!parsed.steps || !parsed.meta) throw new Error('Archivo inválido');
+      if (!confirm('Vas a reemplazar lo que tenés acá ahora por el reporte que cargaste. ¿Seguro?')) return;
+      state = parsed;
+      const empty = emptyState();
+      for (const id of Object.keys(empty.steps)) {
+        if (!state.steps[id]) state.steps[id] = empty.steps[id];
+      }
+      saveState();
+      renderAll();
+      toast('Reporte cargado correctamente');
+    } catch (e) {
+      toast('Error: el archivo no es válido. ' + e.message, 'err');
+    }
+  };
+  r.readAsText(file);
+  input.value = '';
+}
+
+function resetAll() {
+  if (!confirm('Vas a borrar TODO tu progreso (capturas, notas, etc). ¿Seguro?')) return;
+  state = emptyState();
+  saveState();
+  renderAll();
+  toast('Empezando de nuevo');
+}
+
+// ============================================================================
+// Utils
+// ============================================================================
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+let toastTimer = null;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = (type === 'err') ? 'var(--fail)' : 'var(--ok)';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ============================================================================
+// Boot
+// ============================================================================
+renderAll();
+
+// Pre-fill fecha si está vacía
+if (!state.meta.tester_date) {
+  const today = new Date().toISOString().slice(0, 10);
+  state.meta.tester_date = today;
+  document.getElementById('tester-date').value = today;
+  saveState();
+}
+</script>
+</body>
+</html>
