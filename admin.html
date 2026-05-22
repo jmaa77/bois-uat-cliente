@@ -1,0 +1,1458 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bois Bourgeois — Prueba para SuperAdmin antes del lanzamiento</title>
+<style>
+  :root {
+    --primary: #0a3d62;
+    --primary-dark: #062840;
+    --accent: #f4b740;
+    --ok: #2e7d32;
+    --ok-bg: #e8f5e9;
+    --fail: #c62828;
+    --fail-bg: #ffebee;
+    --skip: #616161;
+    --skip-bg: #eeeeee;
+    --pending: #9e9e9e;
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #e0e0e0;
+    --text: #212121;
+    --text-soft: #616161;
+    --shadow: 0 1px 3px rgba(0,0,0,.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header.cover {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 32px 20px;
+    text-align: center;
+  }
+  header.cover h1 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 600;
+  }
+  header.cover p {
+    margin: 0;
+    opacity: .9;
+    font-size: 15px;
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  section.intro, section.summary, section.howto {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  section.intro h2 { color: var(--primary); margin-top: 0; }
+  section.intro ul, section.howto ul, section.howto ol { padding-left: 20px; }
+  section.intro li, section.howto li { margin-bottom: 6px; }
+  .info-box {
+    background: #fff8e1;
+    border-left: 4px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .info-box strong { color: var(--primary-dark); }
+
+  /* Identidad */
+  .identity {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .identity label { display: block; font-size: 13px; color: var(--text-soft); margin-bottom: 4px; }
+  .identity input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 14px;
+  }
+  @media (max-width: 540px) { .identity { grid-template-columns: 1fr; } }
+
+  /* Progreso */
+  .progress-card {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .chip.ok { background: var(--ok-bg); color: var(--ok); }
+  .chip.fail { background: var(--fail-bg); color: var(--fail); }
+  .chip.skip { background: var(--skip-bg); color: var(--skip); }
+  .chip.pending { background: #f5f5f5; color: var(--pending); }
+  .progress-bar-wrap { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+  .progress-bar-fill { height: 100%; background: var(--primary); transition: width .3s; }
+
+  /* Bloques + pasos */
+  .block { margin: 24px 0 8px; }
+  .block-title {
+    color: var(--primary);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent);
+  }
+  .step-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--pending);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+  }
+  .step-card.is-ok { border-left-color: var(--ok); }
+  .step-card.is-fail { border-left-color: var(--fail); }
+  .step-card.is-skip { border-left-color: var(--skip); }
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .step-number {
+    background: var(--primary);
+    color: white;
+    font-weight: 700;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .step-title { font-weight: 600; font-size: 16px; flex: 1; }
+  .step-status-chip {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+  .step-status-chip.ok { background: var(--ok-bg); color: var(--ok); }
+  .step-status-chip.fail { background: var(--fail-bg); color: var(--fail); }
+  .step-status-chip.skip { background: var(--skip-bg); color: var(--skip); }
+  .step-status-chip.pending { background: #f5f5f5; color: var(--pending); }
+
+  .step-criticality {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .step-criticality.crit-high { background: #ffebee; color: var(--fail); border: 1px solid var(--fail); }
+  .step-criticality.crit-medium { background: #fff8e1; color: #a8730a; border: 1px solid var(--accent); }
+  .step-criticality.crit-low { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok); }
+
+  .step-body { padding-left: 38px; }
+  .what-to-do, .what-to-see {
+    margin: 10px 0;
+  }
+  .what-to-do strong, .what-to-see strong {
+    display: block;
+    color: var(--primary-dark);
+    font-size: 13px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+  }
+  .what-to-do p, .what-to-see p { margin: 4px 0; }
+  .mockup {
+    background: #f8f9fb;
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 10px 0;
+    text-align: center;
+  }
+  .mockup-caption {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .mockup svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+
+  /* Status buttons */
+  .status-row {
+    display: flex;
+    gap: 8px;
+    margin: 14px 0 8px;
+    flex-wrap: wrap;
+  }
+  .status-btn {
+    border: 1px solid var(--border);
+    background: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all .15s;
+  }
+  .status-btn:hover { background: #f5f5f5; }
+  .status-btn.active.ok { background: var(--ok); color: white; border-color: var(--ok); }
+  .status-btn.active.fail { background: var(--fail); color: white; border-color: var(--fail); }
+  .status-btn.active.skip { background: var(--skip); color: white; border-color: var(--skip); }
+  .status-btn:disabled,
+  .status-btn.disabled-skip {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f5f5f5;
+    color: #999;
+    border-color: #ddd;
+  }
+  .status-btn:disabled:hover,
+  .status-btn.disabled-skip:hover {
+    background: #f5f5f5;
+  }
+
+  /* Notas + evidencia */
+  textarea.notes {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font: inherit;
+    font-size: 14px;
+    min-height: 70px;
+    resize: vertical;
+    margin-bottom: 8px;
+    background: white;
+  }
+  textarea.notes:focus { outline: none; border-color: var(--primary); }
+  .evidence-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-soft);
+    margin-bottom: 6px;
+    margin-top: 8px;
+  }
+  .paste-zone {
+    background: #f8f9fb;
+    border: 2px dashed var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-soft);
+    cursor: text;
+    transition: all .15s;
+  }
+  .paste-zone:focus, .paste-zone.focused {
+    outline: none;
+    border-color: var(--primary);
+    background: #f0f4f8;
+    color: var(--primary);
+  }
+  .file-input { display: none; }
+  .upload-link {
+    color: var(--primary);
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 600;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .gallery .thumb {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f5f5f5;
+    border: 1px solid var(--border);
+  }
+  .gallery .thumb img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    cursor: pointer;
+    display: block;
+  }
+  .gallery .thumb .del {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0,0,0,.7);
+    color: white;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.9);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 20px;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox img { max-width: 95vw; max-height: 95vh; object-fit: contain; }
+
+  /* Footer / export */
+  section.summary {
+    text-align: center;
+    background: var(--primary);
+    color: white;
+    border: none;
+  }
+  section.summary h2 { color: white; margin-top: 0; }
+  .big-btn {
+    background: var(--accent);
+    color: var(--primary-dark);
+    border: none;
+    padding: 14px 32px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 8px 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2);
+    transition: transform .1s;
+  }
+  .big-btn:hover { transform: translateY(-1px); }
+  .secondary-btn {
+    background: rgba(255,255,255,.15);
+    color: white;
+    border: 1px solid rgba(255,255,255,.3);
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 4px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--ok);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    z-index: 1100;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all .25s;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* HowTo */
+  section.howto {
+    background: #f5f9fc;
+    border-color: #c5d9e8;
+  }
+  section.howto h2 { color: var(--primary); margin-top: 0; }
+  .template-box {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  code { background: #f5f5f5; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  kbd {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <h1>Bois Bourgeois — Prueba para SuperAdmin antes del lanzamiento</h1>
+  <p>Gracias por ayudarnos a probar todas las herramientas de administración del sitio antes de abrirlo al público</p>
+</header>
+
+<main>
+
+<!-- ============ INTRO ============ -->
+<section class="intro">
+  <h2>¿Qué es esto?</h2>
+  <p>Antes de lanzar Bois Bourgeois al público, queremos asegurarnos de que <strong>vos como administrador/a del sitio puedas hacer todo lo necesario para gestionar la plataforma</strong>: ver cómo va el negocio, asociar planes con MercadoPago, manejar las marcas y usuarios, configurar el contenido del sitio, etc.</p>
+
+  <p><strong>Esta guía es larga.</strong> Tiene muchas pruebas porque vas a tener muchas herramientas para usar. Podés hacerla en varias sesiones — el archivo guarda tu progreso automáticamente. Tu opinión sincera nos ayuda a encontrar problemas antes de que los vea cualquier otra persona.</p>
+
+  <div class="info-box">
+    <strong>⏱ Tiempo estimado:</strong> 1 hora 30 minutos a 2 horas. Recomendamos hacerlo en varias sesiones — podés pausar y volver, el progreso se guarda solo.<br>
+    <strong>💻 Necesitás:</strong> Una computadora con un navegador moderno (Chrome, Firefox, Edge o Safari) y acceso a internet.<br>
+    <strong>🔑 Vas a usar:</strong> El correo y contraseña de la cuenta de SuperAdmin que te pasamos. <em>Esta cuenta tiene acceso completo</em> — no la compartas.<br>
+    <strong>💳 Vas a necesitar:</strong> Tener tus 3 planes ya creados en tu panel de MercadoPago (te pedimos eso aparte). La guía asume que ya están ahí.
+  </div>
+
+  <div class="info-box" style="border-left-color: #c62828; background: #fff5f5;">
+    <strong>🎯 Sobre la criticidad de cada prueba</strong><br>
+    Cada paso tiene un nivel de importancia visible arriba a la derecha del título:
+    <ul style="margin: 8px 0 4px 20px; padding: 0;">
+      <li><span class="step-criticality crit-high">🔴 Alta</span> Si esta prueba falla, NO podemos lanzar el sitio — son las cosas que tienen que funcionar sí o sí (login admin, asociar planes con MercadoPago, borrar marca, cambiar tipo de usuario, kill switches de publicidad).</li>
+      <li><span class="step-criticality crit-medium">🟡 Media</span> Si falla, podemos lanzar pero hay que arreglarlo pronto (editar configuración, navegación de tabs, contenido editorial).</li>
+      <li><span class="step-criticality crit-low">🟢 Baja</span> Si falla, lo podemos arreglar después del lanzamiento (ver listas, filtros, vistas read-only).</li>
+    </ul>
+    <strong>Importante:</strong> si encontrás un problema en una prueba de criticidad <strong>Alta</strong>, por favor reportalo apenas la termines — sin esperar a terminar toda la guía. Eso nos ayuda a resolverlo rápido. Como SuperAdmin tenés muchas pruebas Alta porque tu rol controla la configuración del sitio entero.<br>
+    <strong>Las pruebas de criticidad Alta NO se pueden marcar como "No lo probé"</strong> — son obligatorias. Si tenés un problema con una de ellas marcala como "Algo salió mal" y contanos qué pasó.
+  </div>
+
+  <h3>Tus datos (para el reporte)</h3>
+  <p>Por favor completá estos campos antes de empezar:</p>
+  <div class="identity">
+    <div>
+      <label for="tester-name">Tu nombre</label>
+      <input type="text" id="tester-name" placeholder="Ej: Juan Pérez">
+    </div>
+    <div>
+      <label for="tester-email">Tu correo</label>
+      <input type="email" id="tester-email" placeholder="Ej: juan@ejemplo.com">
+    </div>
+    <div>
+      <label for="tester-browser">¿Qué navegador usás?</label>
+      <input type="text" id="tester-browser" placeholder="Ej: Chrome en Windows, Safari en Mac">
+    </div>
+    <div>
+      <label for="tester-date">Fecha de la prueba</label>
+      <input type="date" id="tester-date">
+    </div>
+  </div>
+
+  <div class="progress-card">
+    <div>
+      <span class="chip ok">✓ <span id="count-ok">0</span> funcionaron</span>
+      <span class="chip fail">✗ <span id="count-fail">0</span> con problemas</span>
+      <span class="chip skip">— <span id="count-skip">0</span> no probados</span>
+      <span class="chip pending">○ <span id="count-pending">0</span> pendientes</span>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+</section>
+
+<!-- ============ HOWTO ============ -->
+<section class="howto">
+  <h2>Antes de empezar — Cómo usar esta guía</h2>
+  <ol>
+    <li><strong>Abrí la app de Bois Bourgeois</strong> en otra pestaña del navegador. La dirección te la pasamos por separado.</li>
+    <li><strong>Mantené esta guía abierta</strong> en otra pestaña — vas a ir mirando lo que tenés que hacer.</li>
+    <li>Para cada paso:
+      <ul>
+        <li>Leé qué tenés que hacer en la app.</li>
+        <li>Hacelo en la otra pestaña.</li>
+        <li>Volvé acá y marcá si <strong>✓ Funcionó</strong>, <strong>✗ Algo salió mal</strong>, o <strong>— No lo probé</strong>.</li>
+        <li>Si algo salió mal: escribí qué pasó y pegá una captura (te explicamos cómo abajo).</li>
+      </ul>
+    </li>
+    <li>Cuando termines (o si querés pausar), clickeá <strong>⬇ Descargar reporte</strong> y mandanos el archivo que se descarga.</li>
+  </ol>
+
+  <h3>📸 Cómo pegar una captura de pantalla</h3>
+  <p>Si encontraste algo raro, una captura nos ayuda muchísimo:</p>
+  <ol>
+    <li>En Windows: apretá <kbd>Win</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd>, seleccioná lo que querés capturar, soltá. (En Mac: <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>4</kbd>.)</li>
+    <li>Volvé a esta guía, clickeá adentro del recuadro que dice <em>"Pegar evidencia"</em> en el paso correspondiente.</li>
+    <li>Apretá <kbd>Ctrl</kbd> + <kbd>V</kbd> (Mac: <kbd>Cmd</kbd> + <kbd>V</kbd>). La imagen aparece debajo.</li>
+  </ol>
+  <p>Si no podés con captura, alcanza con que escribas en el textarea qué pasó.</p>
+
+  <h3>📝 Cuando reportes un problema, intentá decir:</h3>
+  <div class="template-box">
+    QUÉ HICE: (ej: "Hice click en el botón Suscribirme")<br>
+    QUÉ ESPERABA VER: (ej: "Pensé que se abría un formulario de tarjeta")<br>
+    QUÉ PASÓ EN REALIDAD: (ej: "La página se quedó cargando 30 segundos y después dijo error")
+  </div>
+</section>
+
+<!-- ============ STEPS CONTAINER ============ -->
+<div id="steps-container"></div>
+
+<!-- ============ FINAL SECTION ============ -->
+<section class="summary">
+  <h2>¡Listo! ¿Cómo nos enviás tu reporte?</h2>
+  <p>Clickeá el botón grande y se descarga un archivo a tu computadora. Después subilo a la carpeta de Google Drive que te compartimos (o mandánoslo por correo).</p>
+  <button class="big-btn" onclick="exportJSON()">⬇ Descargar reporte</button>
+  <div style="margin-top:16px;">
+    <button class="secondary-btn" onclick="document.getElementById('import-file').click()">↑ Cargar reporte anterior</button>
+    <input type="file" id="import-file" class="file-input" accept="application/json" onchange="importJSON(this)">
+    <button class="secondary-btn" onclick="resetAll()">⟲ Empezar de nuevo</button>
+  </div>
+  <p style="font-size:13px; opacity:.8; margin-top:20px;">💡 <strong>Tip:</strong> Si necesitás cerrar la guía y volver después, no te preocupes — tu progreso queda guardado en este navegador. Si cambiás de navegador o computadora, primero <em>descargá el reporte</em> y después en la otra máquina abrí esta guía y <em>cargá el reporte anterior</em>.</p>
+</section>
+
+</main>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" alt="">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+// ============================================================================
+// MOCKUPS (SVG inline) — ilustraciones simples de lo que el cliente debería ver
+// ============================================================================
+const MOCKUPS = {
+  loginForm: `
+    <svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="200" fill="#fafafa"/>
+      <rect x="80" y="20" width="200" height="160" rx="6" fill="#fff" stroke="#ddd"/>
+      <text x="180" y="42" font-family="sans-serif" font-size="14" fill="#0a3d62" text-anchor="middle" font-weight="700">Iniciar sesión</text>
+      <rect x="100" y="60" width="160" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="108" y="75" font-family="sans-serif" font-size="10" fill="#999">Tu correo o usuario</text>
+      <rect x="100" y="92" width="160" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="108" y="107" font-family="sans-serif" font-size="10" fill="#999">Contraseña</text>
+      <rect x="100" y="124" width="160" height="22" rx="3" fill="#fafafa" stroke="#ccc"/>
+      <text x="180" y="139" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">[verificación de seguridad]</text>
+      <rect x="100" y="154" width="160" height="22" rx="3" fill="#0a3d62"/>
+      <text x="180" y="170" font-family="sans-serif" font-size="11" fill="#fff" text-anchor="middle" font-weight="600">Ingresar</text>
+    </svg>
+  `,
+
+  adminKpis: `
+    <svg viewBox="0 0 360 130" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="130" fill="#fafafa"/>
+      <text x="180" y="18" font-family="sans-serif" font-size="11" fill="#666" text-anchor="middle">Los 4 cuadritos que ves al entrar al panel:</text>
+      <g>
+        <rect x="15" y="28" width="80" height="80" rx="6" fill="#fff" stroke="#ddd"/>
+        <text x="55" y="50" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Pagos del mes</text>
+        <text x="55" y="80" font-family="sans-serif" font-size="22" fill="#0a3d62" text-anchor="middle" font-weight="700">12</text>
+      </g>
+      <g>
+        <rect x="105" y="28" width="80" height="80" rx="6" fill="#fff" stroke="#ddd"/>
+        <text x="145" y="50" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Ingresos del mes</text>
+        <text x="145" y="80" font-family="sans-serif" font-size="16" fill="#2e7d32" text-anchor="middle" font-weight="700">$ 828k</text>
+      </g>
+      <g>
+        <rect x="195" y="28" width="80" height="80" rx="6" fill="#fff" stroke="#ddd"/>
+        <text x="235" y="50" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Suscripciones activas</text>
+        <text x="235" y="80" font-family="sans-serif" font-size="22" fill="#0a3d62" text-anchor="middle" font-weight="700">34</text>
+      </g>
+      <g>
+        <rect x="285" y="28" width="60" height="80" rx="6" fill="#fff" stroke="#ddd"/>
+        <text x="315" y="50" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Nuevos usuarios</text>
+        <text x="315" y="80" font-family="sans-serif" font-size="22" fill="#0a3d62" text-anchor="middle" font-weight="700">87</text>
+      </g>
+    </svg>
+  `,
+
+  plansList: `
+    <svg viewBox="0 0 360 180" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="180" fill="#fafafa"/>
+      <text x="20" y="22" font-family="sans-serif" font-size="13" fill="#0a3d62" font-weight="700">Planes</text>
+      <rect x="260" y="10" width="80" height="20" rx="3" fill="#0a3d62"/>
+      <text x="300" y="23" font-family="sans-serif" font-size="9" fill="#fff" text-anchor="middle" font-weight="600">+ Nuevo plan</text>
+      <rect x="20" y="40" width="320" height="20" fill="#f0f0f0"/>
+      <text x="30" y="54" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Tier</text>
+      <text x="110" y="54" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Nombre</text>
+      <text x="200" y="54" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Precio</text>
+      <text x="260" y="54" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">MP Plan ID</text>
+      <g>
+        <rect x="20" y="60" width="320" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="74" font-family="sans-serif" font-size="10" fill="#212121">brand-plus</text>
+        <text x="110" y="74" font-family="sans-serif" font-size="10" fill="#212121">Plan Plus</text>
+        <text x="200" y="74" font-family="sans-serif" font-size="10" fill="#212121">ARS 69.000</text>
+        <text x="260" y="74" font-family="sans-serif" font-size="10" fill="#c62828">dev-mock-...</text>
+      </g>
+      <g>
+        <rect x="20" y="82" width="320" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="96" font-family="sans-serif" font-size="10" fill="#212121">brand-premium</text>
+        <text x="110" y="96" font-family="sans-serif" font-size="10" fill="#212121">Plan Premium</text>
+        <text x="200" y="96" font-family="sans-serif" font-size="10" fill="#212121">ARS 169.000</text>
+        <text x="260" y="96" font-family="sans-serif" font-size="10" fill="#2e7d32">2c938...real</text>
+      </g>
+      <g>
+        <rect x="20" y="104" width="320" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="118" font-family="sans-serif" font-size="10" fill="#212121">user-plus</text>
+        <text x="110" y="118" font-family="sans-serif" font-size="10" fill="#212121">Plus</text>
+        <text x="200" y="118" font-family="sans-serif" font-size="10" fill="#212121">ARS 9.000</text>
+        <text x="260" y="118" font-family="sans-serif" font-size="10" fill="#c62828">dev-mock-...</text>
+      </g>
+      <text x="180" y="155" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">Los que dicen "dev-mock" NO funcionan en pagos reales — hay que asociarlos con un plan tuyo de MP</text>
+    </svg>
+  `,
+
+  planFormMpCombo: `
+    <svg viewBox="0 0 360 280" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="280" fill="#fafafa"/>
+      <rect x="20" y="15" width="320" height="255" rx="6" fill="#fff" stroke="#ddd"/>
+      <text x="180" y="36" font-family="sans-serif" font-size="13" fill="#0a3d62" text-anchor="middle" font-weight="700">Editar plan</text>
+      <text x="32" y="58" font-family="sans-serif" font-size="9" fill="#666">Tier</text>
+      <rect x="32" y="64" width="296" height="20" rx="3" fill="#fafafa" stroke="#ccc"/>
+      <text x="40" y="78" font-family="sans-serif" font-size="10" fill="#666">brand-plus ▼</text>
+      <text x="32" y="98" font-family="sans-serif" font-size="9" fill="#666">Nombre del plan</text>
+      <rect x="32" y="104" width="296" height="20" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="40" y="118" font-family="sans-serif" font-size="10" fill="#212121">Plan Plus</text>
+      <text x="32" y="138" font-family="sans-serif" font-size="9" fill="#0a3d62" font-weight="700">Plan de MercadoPago ⬇</text>
+      <rect x="32" y="144" width="296" height="22" rx="3" fill="#fff" stroke="#2e7d32" stroke-width="2"/>
+      <text x="40" y="159" font-family="sans-serif" font-size="10" fill="#212121">Plan Plus Marca · ARS 69000 · active ▼</text>
+      <rect x="32" y="170" width="50" height="14" rx="3" fill="#e8f5e9"/>
+      <text x="57" y="180" font-family="sans-serif" font-size="8" fill="#2e7d32" text-anchor="middle" font-weight="700">MP: active</text>
+      <text x="92" y="180" font-family="sans-serif" font-size="9" fill="#666">Precio y moneda sincronizados desde MercadoPago</text>
+      <text x="32" y="200" font-family="sans-serif" font-size="9" fill="#666">Precio (no editable)</text>
+      <rect x="32" y="206" width="140" height="20" rx="3" fill="#f5f5f5" stroke="#ccc"/>
+      <text x="40" y="220" font-family="sans-serif" font-size="10" fill="#999">69000</text>
+      <text x="188" y="200" font-family="sans-serif" font-size="9" fill="#666">Moneda (no editable)</text>
+      <rect x="188" y="206" width="140" height="20" rx="3" fill="#f5f5f5" stroke="#ccc"/>
+      <text x="196" y="220" font-family="sans-serif" font-size="10" fill="#999">ARS</text>
+      <rect x="220" y="240" width="55" height="22" rx="3" fill="#fff" stroke="#bbb"/>
+      <text x="247" y="255" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">Cancelar</text>
+      <rect x="280" y="240" width="50" height="22" rx="3" fill="#0a3d62"/>
+      <text x="305" y="255" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">Guardar</text>
+    </svg>
+  `,
+
+  tierEditForm: `
+    <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="220" fill="#fafafa"/>
+      <rect x="20" y="15" width="320" height="195" rx="6" fill="#fff" stroke="#ddd"/>
+      <text x="180" y="36" font-family="sans-serif" font-size="13" fill="#0a3d62" text-anchor="middle" font-weight="700">Editar nivel (Tier)</text>
+      <text x="32" y="58" font-family="sans-serif" font-size="9" fill="#666">Identificador interno</text>
+      <rect x="32" y="64" width="296" height="20" rx="3" fill="#f5f5f5" stroke="#ccc"/>
+      <text x="40" y="78" font-family="sans-serif" font-size="10" fill="#999">brand-plus</text>
+      <text x="32" y="98" font-family="sans-serif" font-size="9" fill="#666">Nombre visible</text>
+      <rect x="32" y="104" width="296" height="20" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="40" y="118" font-family="sans-serif" font-size="10" fill="#212121">Plus</text>
+      <text x="32" y="138" font-family="sans-serif" font-size="9" fill="#666">Máximo de prendas</text>
+      <rect x="32" y="144" width="140" height="20" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="40" y="158" font-family="sans-serif" font-size="10" fill="#212121">20</text>
+      <text x="188" y="138" font-family="sans-serif" font-size="9" fill="#666">Máx. en revista</text>
+      <rect x="188" y="144" width="140" height="20" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="196" y="158" font-family="sans-serif" font-size="10" fill="#212121">10</text>
+      <rect x="220" y="178" width="55" height="22" rx="3" fill="#fff" stroke="#bbb"/>
+      <text x="247" y="193" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">Cancelar</text>
+      <rect x="280" y="178" width="50" height="22" rx="3" fill="#0a3d62"/>
+      <text x="305" y="193" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">Guardar</text>
+    </svg>
+  `,
+
+  brandsTable: `
+    <svg viewBox="0 0 360 180" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="180" fill="#fafafa"/>
+      <text x="20" y="22" font-family="sans-serif" font-size="13" fill="#0a3d62" font-weight="700">Marcas</text>
+      <g>
+        <rect x="170" y="10" width="14" height="14" rx="7" fill="#0a3d62"/>
+        <rect x="178" y="14" width="14" height="6" rx="3" fill="#fff"/>
+        <text x="200" y="22" font-family="sans-serif" font-size="10" fill="#666">Solo upsell candidates (≥80%)</text>
+      </g>
+      <rect x="20" y="35" width="320" height="20" fill="#f0f0f0"/>
+      <text x="30" y="49" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Marca</text>
+      <text x="120" y="49" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Plan</text>
+      <text x="180" y="49" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Uso del plan</text>
+      <text x="280" y="49" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Acciones</text>
+      <g>
+        <rect x="20" y="55" width="320" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="69" font-family="sans-serif" font-size="10" fill="#212121">Marca A</text>
+        <text x="120" y="69" font-family="sans-serif" font-size="10" fill="#212121">Plus</text>
+        <text x="180" y="69" font-family="sans-serif" font-size="10" fill="#c62828" font-weight="700">18/20 (90%)</text>
+        <rect x="280" y="60" width="50" height="14" rx="2" fill="#fff" stroke="#c62828"/>
+        <text x="305" y="71" font-family="sans-serif" font-size="9" fill="#c62828" text-anchor="middle">Borrar</text>
+      </g>
+      <g>
+        <rect x="20" y="77" width="320" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="91" font-family="sans-serif" font-size="10" fill="#212121">Marca B</text>
+        <text x="120" y="91" font-family="sans-serif" font-size="10" fill="#212121">Premium</text>
+        <text x="180" y="91" font-family="sans-serif" font-size="10" fill="#666">∞</text>
+        <rect x="280" y="82" width="50" height="14" rx="2" fill="#fff" stroke="#c62828"/>
+        <text x="305" y="93" font-family="sans-serif" font-size="9" fill="#c62828" text-anchor="middle">Borrar</text>
+      </g>
+      <g>
+        <rect x="20" y="99" width="320" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="113" font-family="sans-serif" font-size="10" fill="#212121">Marca C</text>
+        <text x="120" y="113" font-family="sans-serif" font-size="10" fill="#666">—</text>
+        <text x="180" y="113" font-family="sans-serif" font-size="10" fill="#666">0/0</text>
+        <rect x="280" y="104" width="50" height="14" rx="2" fill="#fff" stroke="#c62828"/>
+        <text x="305" y="115" font-family="sans-serif" font-size="9" fill="#c62828" text-anchor="middle">Borrar</text>
+      </g>
+      <text x="180" y="160" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">Cuando activás "Solo upsell candidates" solo se ve Marca A (la que está al 90%)</text>
+    </svg>
+  `,
+
+  usersB2cTable: `
+    <svg viewBox="0 0 360 170" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="170" fill="#fafafa"/>
+      <text x="20" y="22" font-family="sans-serif" font-size="13" fill="#0a3d62" font-weight="700">Usuarios B2C (pestaña nueva)</text>
+      <rect x="20" y="32" width="320" height="20" fill="#f0f0f0"/>
+      <text x="30" y="46" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Usuario</text>
+      <text x="110" y="46" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Plan</text>
+      <text x="180" y="46" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Uso de clicks</text>
+      <text x="285" y="46" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Se registró</text>
+      <g>
+        <rect x="20" y="52" width="320" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="66" font-family="sans-serif" font-size="10" fill="#212121">juan_perez</text>
+        <rect x="110" y="58" width="35" height="12" rx="2" fill="#e8f5e9"/>
+        <text x="128" y="67" font-family="sans-serif" font-size="9" fill="#2e7d32" text-anchor="middle" font-weight="700">Plus</text>
+        <text x="180" y="66" font-family="sans-serif" font-size="10" fill="#666">∞</text>
+        <text x="285" y="66" font-family="sans-serif" font-size="10" fill="#666">10/05/26</text>
+      </g>
+      <g>
+        <rect x="20" y="74" width="320" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="88" font-family="sans-serif" font-size="10" fill="#212121">maria_gomez</text>
+        <text x="110" y="88" font-family="sans-serif" font-size="10" fill="#666">—</text>
+        <text x="180" y="88" font-family="sans-serif" font-size="10" fill="#c62828" font-weight="700">9/10 (90%)</text>
+        <text x="285" y="88" font-family="sans-serif" font-size="10" fill="#666">15/05/26</text>
+      </g>
+      <g>
+        <rect x="20" y="96" width="320" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="110" font-family="sans-serif" font-size="10" fill="#212121">ana_martin</text>
+        <text x="110" y="110" font-family="sans-serif" font-size="10" fill="#666">—</text>
+        <text x="180" y="110" font-family="sans-serif" font-size="10" fill="#212121">3/10 (30%)</text>
+        <text x="285" y="110" font-family="sans-serif" font-size="10" fill="#666">18/05/26</text>
+      </g>
+      <text x="180" y="145" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">maria_gomez está al 90% — candidata para ofrecerle Plus</text>
+    </svg>
+  `,
+
+  systemSettings: `
+    <svg viewBox="0 0 360 210" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="210" fill="#fafafa"/>
+      <text x="20" y="22" font-family="sans-serif" font-size="13" fill="#0a3d62" font-weight="700">Configuraciones del sistema</text>
+      <g>
+        <rect x="20" y="35" width="320" height="36" rx="4" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="51" font-family="sans-serif" font-size="10" fill="#212121" font-weight="600">google_adsense_demo_mode</text>
+        <text x="30" y="64" font-family="sans-serif" font-size="9" fill="#666">Modo de demo de publicidad: off / mock / real</text>
+        <rect x="240" y="44" width="90" height="20" rx="3" fill="#fffbeb" stroke="#f4b740"/>
+        <text x="285" y="58" font-family="sans-serif" font-size="10" fill="#5a4a1a" text-anchor="middle" font-weight="600">mock ▼</text>
+      </g>
+      <g>
+        <rect x="20" y="78" width="320" height="36" rx="4" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="94" font-family="sans-serif" font-size="10" fill="#212121" font-weight="600">google_adsense_enabled</text>
+        <text x="30" y="107" font-family="sans-serif" font-size="9" fill="#666">Si está activado, se muestran las publicidades reales</text>
+        <rect x="240" y="87" width="90" height="20" rx="3" fill="#fff" stroke="#ddd"/>
+        <text x="285" y="101" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">false ▼</text>
+      </g>
+      <g>
+        <rect x="20" y="121" width="320" height="36" rx="4" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="137" font-family="sans-serif" font-size="10" fill="#212121" font-weight="600">google_adsense_publisher_id</text>
+        <text x="30" y="150" font-family="sans-serif" font-size="9" fill="#666">Tu ID de publicación de AdSense (ca-pub-...)</text>
+        <rect x="180" y="130" width="150" height="20" rx="3" fill="#fff" stroke="#ddd"/>
+        <text x="188" y="143" font-family="sans-serif" font-size="9" fill="#212121">ca-pub-8153711670495964</text>
+      </g>
+      <text x="180" y="190" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">Cada fila es una configuración con su valor — clickeá para editarlo</text>
+    </svg>
+  `,
+
+  limitsOverrides: `
+    <svg viewBox="0 0 360 170" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="170" fill="#fafafa"/>
+      <text x="20" y="22" font-family="sans-serif" font-size="13" fill="#0a3d62" font-weight="700">Excepciones de límites</text>
+      <text x="20" y="38" font-family="sans-serif" font-size="9" fill="#666">Aquí podés darle a una marca específica más capacidad que la del plan</text>
+      <rect x="20" y="50" width="320" height="20" fill="#f0f0f0"/>
+      <text x="30" y="64" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Marca</text>
+      <text x="140" y="64" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Tipo de límite</text>
+      <text x="240" y="64" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Nuevo valor</text>
+      <g>
+        <rect x="20" y="70" width="320" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="84" font-family="sans-serif" font-size="10" fill="#212121">Marca A (caso especial)</text>
+        <text x="140" y="84" font-family="sans-serif" font-size="10" fill="#212121">upload_limit</text>
+        <text x="240" y="84" font-family="sans-serif" font-size="10" fill="#2e7d32" font-weight="700">50</text>
+      </g>
+      <g>
+        <rect x="20" y="92" width="320" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="30" y="106" font-family="sans-serif" font-size="10" fill="#212121">Marca B (beta)</text>
+        <text x="140" y="106" font-family="sans-serif" font-size="10" fill="#212121">magazine_limit</text>
+        <text x="240" y="106" font-family="sans-serif" font-size="10" fill="#2e7d32" font-weight="700">∞</text>
+      </g>
+      <rect x="240" y="135" width="90" height="22" rx="3" fill="#0a3d62"/>
+      <text x="285" y="149" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">+ Agregar excepción</text>
+    </svg>
+  `,
+
+  emailTemplateEditor: `
+    <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="220" fill="#fafafa"/>
+      <text x="20" y="22" font-family="sans-serif" font-size="13" fill="#0a3d62" font-weight="700">Editor de emails</text>
+      <rect x="20" y="32" width="320" height="22" fill="#fff" stroke="#ddd"/>
+      <text x="30" y="46" font-family="sans-serif" font-size="10" fill="#212121">Plantilla: Verificación de correo ▼</text>
+      <g>
+        <rect x="20" y="60" width="80" height="22" fill="#0a3d62"/>
+        <text x="60" y="74" font-family="sans-serif" font-size="9" fill="#fff" text-anchor="middle" font-weight="600">ES</text>
+        <rect x="100" y="60" width="80" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="140" y="74" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">EN</text>
+        <rect x="180" y="60" width="80" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="220" y="74" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">FR</text>
+        <rect x="260" y="60" width="80" height="22" fill="#fff" stroke="#ddd"/>
+        <text x="300" y="74" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">IT</text>
+      </g>
+      <text x="30" y="98" font-family="sans-serif" font-size="9" fill="#666">Asunto del email</text>
+      <rect x="20" y="104" width="320" height="20" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="28" y="118" font-family="sans-serif" font-size="10" fill="#212121">Verificá tu correo en Bois Bourgeois</text>
+      <text x="30" y="138" font-family="sans-serif" font-size="9" fill="#666">Cuerpo del email</text>
+      <rect x="20" y="144" width="320" height="44" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="28" y="158" font-family="sans-serif" font-size="10" fill="#212121">Hola {nombre},</text>
+      <text x="28" y="172" font-family="sans-serif" font-size="10" fill="#212121">Hacé click acá para activar tu cuenta...</text>
+      <rect x="290" y="195" width="40" height="20" rx="3" fill="#0a3d62"/>
+      <text x="310" y="208" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">Guardar</text>
+    </svg>
+  `,
+};
+
+// ============================================================================
+// PASOS DE LA PRUEBA
+// ============================================================================
+const STEPS = [
+  // ----- BLOQUE 1: ENTRAR Y PANEL -----
+  { id: 1, block: '1. Entrar y ver tu panel', n: 1,
+    criticality: 'high',
+    title: 'Iniciar sesión con tu cuenta de administrador',
+    doStr: 'Abrí la dirección que te pasamos en una pestaña nueva. Buscá "Ingresar" arriba a la derecha. Completá con el correo/usuario y contraseña de tu cuenta de SuperAdmin. Si te pide verificación de seguridad, completala.',
+    seeStr: 'Te lleva al sitio principal y arriba a la derecha aparece tu nombre. Si entrás a "Panel" o "Mi cuenta" → "Dashboard", deberías ver MUCHAS más opciones que las que ve un usuario normal (cuadritos de números, pestañas con muchas opciones).',
+    mockup: 'loginForm',
+    mockupCaption: 'El formulario de inicio de sesión',
+  },
+  { id: 2, block: '1. Entrar y ver tu panel', n: 2,
+    criticality: 'medium',
+    title: 'Ver los 4 indicadores del mes (KPIs)',
+    doStr: 'En el panel principal (Dashboard), arriba de todo, vas a ver 4 cuadritos con números: cantidad de pagos del mes, ingresos del mes, suscripciones activas, y nuevos usuarios del mes.',
+    seeStr: 'Los 4 cuadritos muestran números reales. Si recién arranca prod, pueden estar en cero — eso está bien. Lo importante es que se vean los 4 cuadritos sin errores ni texto roto.',
+    mockup: 'adminKpis',
+    mockupCaption: 'Los 4 cuadritos que ves al entrar',
+  },
+
+  // ----- BLOQUE 2: PLANES Y MERCADOPAGO -----
+  { id: 3, block: '2. Planes y MercadoPago (importante)', n: 3,
+    criticality: 'medium',
+    title: 'Ver la lista de planes',
+    doStr: 'En el panel, andá a la pestaña "Niveles y Planes" (o "Planes"). Vas a ver una tabla con los planes existentes: Plan Plus marca, Plan Premium marca, y Plus usuario.',
+    seeStr: 'Aparecen los 3 planes. Cada uno tiene su tier, nombre, precio en ARS, y el "MP Plan ID". Si el MP Plan ID empieza con "dev-mock-", significa que todavía no está asociado a un plan real de MercadoPago (es lo esperado antes de que asocies los tuyos).',
+    mockup: 'plansList',
+    mockupCaption: 'La tabla de planes',
+  },
+  { id: 4, block: '2. Planes y MercadoPago (importante)', n: 4,
+    criticality: 'high',
+    title: 'Asociar un plan con tu MercadoPago — Plan Plus marca',
+    doStr: 'En la tabla, encontrá la fila "brand-plus" (Plan Plus). Clickeá "Editar". En el formulario, buscá el combo "Plan de MercadoPago". Clickealo — debería listar los planes que vos creaste en tu panel de MercadoPago. Elegí el que corresponda al Plan Plus (ARS 69.000). El precio y la moneda se autocompletan solos.',
+    seeStr: 'Después de elegir el plan de MP, los campos "Precio" y "Moneda" quedan grises (no editables) — eso confirma que se sincronizaron desde MercadoPago. Debajo del combo aparece un cartelito verde "MP: active" + un texto explicativo. Guardá.',
+    mockup: 'planFormMpCombo',
+    mockupCaption: 'Cómo se ve el formulario después de elegir el plan de MP',
+  },
+  { id: 5, block: '2. Planes y MercadoPago (importante)', n: 5,
+    criticality: 'high',
+    title: 'Repetir para los otros 2 planes (Plan Premium marca + Plus usuario)',
+    doStr: 'Hacé lo mismo del paso anterior con las otras 2 filas: "brand-premium" (Plan Premium, ARS 169.000) y "user-plus" (Plus, ARS 9.000). Asociá cada uno con su plan real de MercadoPago.',
+    seeStr: 'Después de los 3, la tabla debería mostrar todos los planes con un MP Plan ID que NO empiece con "dev-mock-". Eso significa que ya están listos para que los usuarios y marcas puedan pagar de verdad.',
+  },
+  { id: 6, block: '2. Planes y MercadoPago (importante)', n: 6,
+    criticality: 'medium',
+    title: 'Probar de eliminar un plan (con cuidado, opcional)',
+    doStr: 'Si querés probar el borrado: creá primero un plan de prueba (clickeá "+ Nuevo plan", completá los campos, guardá). Después en la lista, clickeá "Borrar" en ese plan de prueba. Confirmá si te pregunta.',
+    seeStr: 'El plan de prueba desaparece de la tabla. NO toques los 3 planes principales (brand-plus, brand-premium, user-plus) — si los borrás los usuarios no pueden suscribirse. Marcá "No lo probé" si no querés arriesgar.',
+  },
+
+  // ----- BLOQUE 3: NIVELES (TIERS) -----
+  { id: 7, block: '3. Niveles internos (Tiers)', n: 7,
+    criticality: 'low',
+    title: 'Ver los niveles de las marcas (Tiers BRAND)',
+    doStr: 'En el panel, andá a "Niveles" o "Tier Settings". Elegí la pestaña "Brand". Vas a ver los niveles que pueden tener las marcas: brand-plus, brand-premium, y posiblemente alguno gratuito.',
+    seeStr: 'Cada nivel muestra su nombre y los límites: cuántas prendas puede subir, cuántas imágenes de revista, etc. Estos límites son los que respetan las marcas según el plan que tengan.',
+  },
+  { id: 8, block: '3. Niveles internos (Tiers)', n: 8,
+    criticality: 'high',
+    title: 'Editar un nivel de marca (cambiar el límite de prendas)',
+    doStr: 'En la tabla, elegí "brand-plus" y clickeá "Editar". Cambiá el campo "Máximo de prendas" — por ejemplo, ponele 25 en vez de 20. Guardá.',
+    seeStr: 'El cambio se ve reflejado en la lista. Si vas al panel de cualquier marca con plan Plus, su barra de uso ahora debería decir "X / 25" en vez de "X / 20". ATENCIÓN: si querés volver al valor original, hacelo ahora.',
+    mockup: 'tierEditForm',
+    mockupCaption: 'El formulario de edición de nivel',
+  },
+  { id: 9, block: '3. Niveles internos (Tiers)', n: 9,
+    criticality: 'low',
+    title: 'Ver los niveles de los usuarios (Tiers USER)',
+    doStr: 'En la misma pantalla, cambiá a la pestaña "User". Vas a ver los niveles para usuarios B2C: user-free, user-plus.',
+    seeStr: 'Cada uno muestra sus 5 límites internos: cantidad de clicks, cantidad de favoritos, cantidad de búsquedas, cada cuántos clicks aparece publicidad, y máximo de prendas que puede ver en el catálogo. El "user-plus" tiene todos sin límite (o casi).',
+  },
+  { id: 10, block: '3. Niveles internos (Tiers)', n: 10,
+    criticality: 'high',
+    title: 'Modificar un límite de usuario (cambiar cantidad de favoritos)',
+    doStr: 'En user-free, clickeá "Editar". Buscá el campo "favoritos" (favorite_limit) — debería estar en algún número como 20 o 50. Cambialo a un número más bajo, ej. 10. Guardá.',
+    seeStr: 'El cambio se aplica al instante. Si un usuario Free tiene exactamente la cantidad que pusiste, va a recibir el aviso de "límite alcanzado" la próxima vez que intente agregar uno más. Recordá volver al valor original si quisiste solo probar.',
+  },
+
+  // ----- BLOQUE 4: MARCAS -----
+  { id: 11, block: '4. Manejo de marcas', n: 11,
+    criticality: 'low',
+    title: 'Ver la lista de marcas',
+    doStr: 'En el panel, andá a "Usuarios y Marcas" → pestaña "Marcas". Vas a ver una tabla con todas las marcas del sitio: nombre, dueño, plan actual, y cuánto están usando de su plan.',
+    seeStr: 'La tabla muestra todas las marcas. La columna "Uso del plan" tiene un color: verde si están bien, amarillo si están cerca del tope (60-80%), rojo si están casi al límite (>=80%).',
+    mockup: 'brandsTable',
+    mockupCaption: 'La tabla de marcas con el filtro upsell',
+  },
+  { id: 12, block: '4. Manejo de marcas', n: 12,
+    criticality: 'low',
+    title: 'Usar el filtro "Solo upsell candidates"',
+    doStr: 'En la misma pantalla, arriba de la tabla hay un switch que dice "Solo upsell candidates (>=80%)". Activalo.',
+    seeStr: 'La tabla se filtra y solo se ven las marcas que están cerca o pasaron el límite del plan — son las que probablemente quieran mejorar a un plan más alto. Al lado del switch aparece el contador "X / Total".',
+  },
+  { id: 13, block: '4. Manejo de marcas', n: 13,
+    criticality: 'high',
+    title: 'Borrar una marca (CON MUCHO CUIDADO)',
+    doStr: 'IMPORTANTE: Esto borra la marca completa con todas sus prendas. Solo hacelo con una marca de prueba que crearon a propósito (pedinos crear una "Marca Test" antes si querés probar). En la tabla, clickeá "Borrar" en la marca de prueba. Confirmá.',
+    seeStr: 'La marca desaparece de la tabla y también del catálogo principal del sitio. Sus prendas también se borran. Esta acción NO tiene vuelta — por eso solo se usa con cuentas de prueba.',
+  },
+  { id: 14, block: '4. Manejo de marcas', n: 14,
+    criticality: 'high',
+    title: 'Agregar una excepción de límite a una marca',
+    doStr: 'En el panel, andá a "Excepciones de límites" (o "Limits Overrides"). Clickeá "+ Agregar excepción". Elegí una marca de la lista, elegí qué tipo de límite querés cambiarle (ej. upload_limit), poné un valor más alto (ej. 50). Guardá.',
+    seeStr: 'La excepción aparece en la tabla. Esa marca ahora puede usar el límite nuevo sin importar su plan. Útil para casos especiales: marcas beta, clientes importantes, etc. La marca también muestra una etiqueta amarilla en la tabla de marcas indicando que tiene excepciones.',
+    mockup: 'limitsOverrides',
+    mockupCaption: 'La pantalla de excepciones de límites',
+  },
+
+  // ----- BLOQUE 5: USUARIOS B2C -----
+  { id: 15, block: '5. Manejo de usuarios B2C', n: 15,
+    criticality: 'low',
+    title: 'Ver la lista de usuarios B2C',
+    doStr: 'En "Usuarios y Marcas", andá a la pestaña "Usuarios B2C" (es una pestaña nueva, distinta a "Usuarios" general). Solo muestra los que pagan o pueden pagar plan Plus.',
+    seeStr: 'Aparece una tabla con los usuarios finales: usuario, plan que tienen (o "—" si están en Free), cuánto usaron este mes, y desde cuándo están registrados.',
+    mockup: 'usersB2cTable',
+    mockupCaption: 'La tabla de usuarios B2C',
+  },
+  { id: 16, block: '5. Manejo de usuarios B2C', n: 16,
+    criticality: 'low',
+    title: 'Filtrar usuarios cerca del límite',
+    doStr: 'En la misma pantalla, arriba hay 2 switches: "Solo con plan" (filtra los que ya pagan) y "Solo upsell candidates (>=80%)". Probá los 2 (separados y combinados).',
+    seeStr: 'La tabla se filtra según lo que activaste. "Solo con plan" deja solo los Plus. "Solo upsell" deja solo los que están al 80%+ de su límite. Combinados pueden quedar pocos o ninguno.',
+  },
+  { id: 17, block: '5. Manejo de usuarios B2C', n: 17,
+    criticality: 'high',
+    title: 'Cambiar el tipo de un usuario (promover a brand o admin)',
+    doStr: 'Andá a la pestaña "Usuarios" (la general, no la B2C). Encontrá un usuario y clickeá en su tipo. Aparece un menú con opciones: User, Brand, Influencer, BrandsModerator, SiteAdmin, Admin. Probá cambiarlo a otra opción (ej. Influencer) y volverlo a User.',
+    seeStr: 'El cambio se aplica al instante. NO podés cambiar tu propio tipo (te debería bloquear). NO promuevas a alguien a Admin a menos que sepas lo que estás haciendo — Admin tiene control total. Volvé al valor original.',
+  },
+
+  // ----- BLOQUE 6: CONFIGURACIÓN DEL SITIO -----
+  { id: 18, block: '6. Configuración del sitio', n: 18,
+    criticality: 'medium',
+    title: 'Cambiar imágenes del sitio (banner, logo, etc.)',
+    doStr: 'En el panel principal (Dashboard), andá a "Site Images" o "Imágenes del sitio". Vas a ver las imágenes que se usan en la home (banner principal, logos secundarios, etc.). Subí una imagen nueva como banner (cualquier imagen jpg). Guardá.',
+    seeStr: 'Después de guardar, abrí el sitio principal en otra pestaña — el banner debería verse cambiado. Si no se ve el cambio, recargá con Ctrl+F5.',
+  },
+  { id: 19, block: '6. Configuración del sitio', n: 19,
+    criticality: 'medium',
+    title: 'Cambiar textos del sitio (títulos, footer)',
+    doStr: 'En "Text Manager" o "Textos del sitio", vas a ver textos editables como el título del home, el footer, mensajes de error, etc. Cambiá uno simple (ej. "Síguenos en nuestras redes") por algo distinto. Guardá.',
+    seeStr: 'Abrí el sitio principal. El texto que cambiaste debería estar reflejado. Acordate de volver al valor original después de la prueba.',
+  },
+
+  // ----- BLOQUE 7: EMAIL TEMPLATES -----
+  { id: 20, block: '7. Plantillas de email', n: 20,
+    criticality: 'low',
+    title: 'Ver las plantillas de email actuales',
+    doStr: 'En el panel, andá a "Email Template Manager" o "Plantillas de email". Vas a ver una lista de tipos de email que envía el sistema: verificación, recuperar contraseña, etc.',
+    seeStr: 'Cada plantilla se puede editar y tiene 4 versiones (una por idioma: ES, EN, FR, IT). Las pestañas de los idiomas se ven arriba del editor.',
+    mockup: 'emailTemplateEditor',
+    mockupCaption: 'El editor de plantillas de email',
+  },
+  { id: 21, block: '7. Plantillas de email', n: 21,
+    criticality: 'medium',
+    title: 'Editar una plantilla en español',
+    doStr: 'Elegí la plantilla "Verificación de correo" (o cualquiera). En la pestaña "ES", cambiá algo simple — por ejemplo, agregale "¡" al inicio del asunto. Guardá.',
+    seeStr: 'El cambio se guarda. Si arriba aparece un cartel amarillo "Cambios sin guardar", es porque te falta confirmar (clickeá Guardar). Si los 4 idiomas tienen distintos textos, asegurate de editar el que corresponda (ES para español).',
+  },
+  { id: 22, block: '7. Plantillas de email', n: 22,
+    criticality: 'high',
+    title: 'Probar que llega el email modificado (registrate o pedí recuperar contraseña)',
+    doStr: 'Para verificar que tu cambio se aplica realmente: salí de tu cuenta y en el formulario de "Crear cuenta" creá una cuenta nueva con un email tuyo accesible. El email que te llegue debería tener el cambio que hiciste en el paso anterior.',
+    seeStr: 'Recibís el email de verificación. El asunto/cuerpo refleja tu cambio. Si no llega, revisá spam. Si sigue sin llegar, hay un problema con el sistema de emails — reportalo. Volvé a la cuenta de Admin original cuando termines.',
+  },
+
+  // ----- BLOQUE 8: CONTENIDO EDITORIAL -----
+  { id: 23, block: '8. Contenido editorial', n: 23,
+    criticality: 'medium',
+    title: 'Manejar Novedades (News slides de la home)',
+    doStr: 'En el panel, andá a "News" o "Novedades". Vas a ver las slides que aparecen en la home (carrusel grande arriba). Agregá una nueva: elegí una prenda destacada, subí una imagen, ponele un orden de visualización. Guardá.',
+    seeStr: 'En el panel se ve la slide nueva en la lista. Si abrís la home, el carrusel debería incluir tu slide nueva. Acordate de marcarla como "no visible" después si era solo de prueba.',
+  },
+  { id: 24, block: '8. Contenido editorial', n: 24,
+    criticality: 'medium',
+    title: 'Manejar categorías (tipos, categorías, eventos)',
+    doStr: 'En el panel, andá a "Categories". Vas a ver 3 pestañas: Tipos (camisa, pantalón, etc.), Categorías (subdivisiones), Eventos (verano, casual, formal). Creá una categoría nueva de prueba.',
+    seeStr: 'La categoría nueva aparece en la lista y debería estar disponible para usarse cuando creás una prenda. Si la creaste solo para probar, borrala después.',
+  },
+  { id: 25, block: '8. Contenido editorial', n: 25,
+    criticality: 'low',
+    title: 'Manejar Multimedia (biblioteca de imágenes)',
+    doStr: 'En el panel, andá a "Multimedia". Vas a ver todas las imágenes subidas al sitio (banners, logos, imágenes de prendas, etc.). Probá subir una imagen nueva.',
+    seeStr: 'La imagen aparece en la lista con un nombre y previsualización. Esta es la biblioteca general — desde acá podés referenciar imágenes en otras partes (slides, banners).',
+  },
+
+  // ----- BLOQUE 9: IMPORTER + SETTINGS + ADSENSE -----
+  { id: 26, block: '9. Herramientas avanzadas', n: 26,
+    criticality: 'medium',
+    title: 'Probar el Importer (importar prendas desde una URL externa)',
+    doStr: 'En el panel, andá a "Importer". Esta herramienta sirve para importar prendas masivamente desde el sitio de una marca. Probá con la URL del catálogo de una marca real. Configurá una "plantilla" si es necesario y dale "Preview".',
+    seeStr: 'La pantalla muestra las prendas que detectó automáticamente (nombre, precio, foto). Podés revisarlas y decidir cuáles importar. Es una herramienta poderosa — usarla con cuidado para no llenar el catálogo de cosas que no querés.',
+  },
+  { id: 27, block: '9. Herramientas avanzadas', n: 27,
+    criticality: 'low',
+    title: 'Ver las configuraciones del sistema (System Settings)',
+    doStr: 'En el panel, andá a "System Settings" o "Configuraciones del sistema". Vas a ver una lista grande de configuraciones generales: límites por defecto, switches generales, configuraciones de AdSense, etc.',
+    seeStr: 'Cada fila es una configuración con su valor actual. Algunas son booleanas (true/false), otras son números (límites), otras son textos (IDs de AdSense, mensajes globales). Es la "caja de herramientas" del SuperAdmin.',
+    mockup: 'systemSettings',
+    mockupCaption: 'La pantalla de System Settings (algunos ejemplos)',
+  },
+  { id: 28, block: '9. Herramientas avanzadas', n: 28,
+    criticality: 'high',
+    title: 'Activar el modo demo de AdSense (para mostrar publicidad de prueba)',
+    doStr: 'En System Settings, buscá la configuración "google_adsense_demo_mode". Cambiala de "off" a "mock". Guardá.',
+    seeStr: 'Después de guardar, salí de tu cuenta. Hacé login con un usuario de prueba (tipo Free). Hacé clicks en varias prendas para llegar al punto donde aparece la publicidad. Ahora debería aparecer una ventana con un cartel "MODO DEMO" + una publicidad simulada con imagen, marca, etc. (no es publicidad real).',
+  },
+  { id: 29, block: '9. Herramientas avanzadas', n: 29,
+    criticality: 'medium',
+    title: 'Volver el modo AdSense a "off" después de las demos',
+    doStr: 'Cuando termines la prueba o la demo con el cliente, volvé a System Settings y cambiá "google_adsense_demo_mode" de "mock" a "off". Guardá.',
+    seeStr: 'Después de guardar, los usuarios vuelven a ver el cartel simple original (sin la publicidad mock). Cuando AdSense esté aprobado por Google y tengas el slot_id real, podés cambiar "mock" por "real" para mostrar publicidad real.',
+  },
+  { id: 30, block: '9. Herramientas avanzadas', n: 30,
+    criticality: 'high',
+    title: 'Cuando AdSense esté aprobado: cargar publisher_id y slot_id reales',
+    doStr: 'Cuando Google AdSense apruebe tu cuenta (toma semanas), te van a dar dos códigos: el Publisher ID (ca-pub-XXXXXXXX) y el Slot ID (numérico). Cargalos en System Settings: google_adsense_publisher_id y google_adsense_default_slot_id. Después cambiá google_adsense_enabled de "false" a "true". Guardá los 3 cambios.',
+    seeStr: 'Después de guardar, los usuarios Free que lleguen al umbral de clicks van a ver publicidades REALES de Google AdSense. Esto te genera ingresos cuando los usuarios las clickean. Asegurate de tener google_adsense_demo_mode en "off" antes de activar el real, sino se sigue mostrando el mock.',
+  },
+  { id: 31, block: '9. Herramientas avanzadas', n: 31,
+    criticality: 'high',
+    title: 'Pausar todas las publicidades de emergencia (kill switch)',
+    doStr: 'Si por algún motivo querés sacar TODA la publicidad del sitio sin esperar nada (por ej. un problema con AdSense): andá a System Settings, cambiá "google_adsense_enabled" de "true" a "false". Guardá.',
+    seeStr: 'Las publicidades reales dejan de mostrarse inmediatamente. Los usuarios siguen viendo el cartel simple sin publicidad. No hace falta desplegar nada nuevo — el cambio es instantáneo desde tu panel.',
+  },
+  { id: 32, block: '9. Herramientas avanzadas', n: 32,
+    criticality: 'medium',
+    title: 'Resumen — Salir de tu cuenta y volver a chequear que todo sigue bien',
+    doStr: 'Después de todas estas pruebas, salí de tu cuenta (logout). Abrí el sitio principal como usuario anónimo. Buscá una prenda, mirá si todo se ve bien, intentá entrar a /admin sin login — debería pedirte loguearte. Volvé a tu cuenta de Admin y verificá que el panel se sigue viendo igual que al principio.',
+    seeStr: 'Todo sigue funcionando normal para usuarios anónimos. El panel de admin sigue accesible para vos. Los cambios que dejaste hechos (si dejaste alguno) están reflejados. ¡Listo, llegaste al final de la prueba!',
+  },
+  { id: 33, block: '9. Herramientas avanzadas', n: 33,
+    criticality: 'low',
+    title: 'Recorrer el resto de configuraciones del sistema (opcional)',
+    doStr: 'En System Settings vas a ver MÁS configuraciones que las de AdSense que ya probamos (anonymous_search_limit, user_free_search_limit, user_free_favorite_limit, user_free_ads_after_clicks, user_free_catalog_cap, user_free_search_filter_limit). Recorré la lista, identificá cuáles entendés y cuáles no. Si tenés ganas, probá editar UNA cualquiera (por ejemplo cambiá el limit de búsquedas anónimas de 5 a 3) y guardá. Después devolvelo a su valor original.',
+    seeStr: 'Cada configuración tiene su descripción que explica para qué sirve. Después de guardar un cambio, el comportamiento de la app debería reflejarlo en la siguiente acción del usuario afectado (ej. el límite anónimo se aplica al próximo visitante sin cuenta). Si alguna configuración te resulta confusa o falta su descripción, anotalo. Si no llegás a probar esta parte, marcala como "No lo probé" — es opcional.',
+  },
+];
+
+// ============================================================================
+// State management
+// ============================================================================
+const STORAGE_KEY = 'bois-uat-admin-v1';
+
+function emptyState() {
+  return {
+    version: 1,
+    meta: {
+      tester_name: '', tester_email: '', tester_browser: '', tester_date: '',
+      started_at: new Date().toISOString(),
+      last_saved_at: null,
+    },
+    steps: Object.fromEntries(
+      STEPS.map(s => [s.id, { status: 'pending', notes: '', images: [] }])
+    ),
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return emptyState();
+    const parsed = JSON.parse(raw);
+    const empty = emptyState();
+    for (const id of Object.keys(empty.steps)) {
+      if (!parsed.steps[id]) parsed.steps[id] = empty.steps[id];
+    }
+    return parsed;
+  } catch (e) {
+    return emptyState();
+  }
+}
+
+function saveState() {
+  state.meta.last_saved_at = new Date().toISOString();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    toast('No se pudo guardar — el archivo está demasiado lleno. Descargá el reporte y empezá de nuevo.', 'err');
+  }
+}
+
+let state = loadState();
+
+// ============================================================================
+// Render
+// ============================================================================
+function renderAll() {
+  document.getElementById('tester-name').value = state.meta.tester_name || '';
+  document.getElementById('tester-email').value = state.meta.tester_email || '';
+  document.getElementById('tester-browser').value = state.meta.tester_browser || '';
+  document.getElementById('tester-date').value = state.meta.tester_date || '';
+
+  const container = document.getElementById('steps-container');
+  container.innerHTML = '';
+  let currentBlock = null;
+  for (const step of STEPS) {
+    if (step.block !== currentBlock) {
+      currentBlock = step.block;
+      const blockDiv = document.createElement('div');
+      blockDiv.className = 'block';
+      blockDiv.innerHTML = `<h2 class="block-title">${escapeHtml(step.block)}</h2>`;
+      container.appendChild(blockDiv);
+    }
+    container.appendChild(renderStep(step));
+  }
+  updateSummary();
+}
+
+function renderStep(step) {
+  const s = state.steps[step.id];
+  const card = document.createElement('div');
+  card.className = `step-card is-${s.status}`;
+  card.dataset.stepId = step.id;
+
+  const mockupHtml = step.mockup
+    ? `<div class="mockup">${MOCKUPS[step.mockup] || ''}<div class="mockup-caption">${escapeHtml(step.mockupCaption || '')}</div></div>`
+    : '';
+
+  card.innerHTML = `
+    <div class="step-head">
+      <span class="step-number">${escapeHtml(String(step.n))}</span>
+      <span class="step-title">${escapeHtml(step.title)}</span>
+      <span class="step-criticality crit-${step.criticality || 'medium'}" title="Criticidad de la prueba">${critLabel(step.criticality)}</span>
+      <span class="step-status-chip ${s.status}">${statusLabel(s.status)}</span>
+    </div>
+    <div class="step-body">
+      <div class="what-to-do">
+        <strong>👉 Qué tenés que hacer</strong>
+        <p>${escapeHtml(step.doStr)}</p>
+      </div>
+      <div class="what-to-see">
+        <strong>👁 Qué deberías ver</strong>
+        <p>${escapeHtml(step.seeStr)}</p>
+      </div>
+      ${mockupHtml}
+      <div class="status-row">
+        <button class="status-btn ${s.status === 'ok' ? 'active ok' : ''}" onclick="setStatus(${step.id}, 'ok')">✓ Funcionó</button>
+        <button class="status-btn ${s.status === 'fail' ? 'active fail' : ''}" onclick="setStatus(${step.id}, 'fail')">✗ Algo salió mal</button>
+        <button
+          class="status-btn ${s.status === 'skip' ? 'active skip' : ''}${step.criticality === 'high' ? ' disabled-skip' : ''}"
+          ${step.criticality === 'high' ? 'disabled title="No se puede skipear: criticidad Alta — esta prueba debe completarse para validar el lanzamiento"' : ''}
+          onclick="setStatus(${step.id}, 'skip')">— No lo probé</button>
+      </div>
+      <textarea class="notes"
+        placeholder="¿Algo para contarnos? Si algo salió mal, contanos qué pasó (qué hiciste, qué esperabas, qué viste). Si todo OK, podés dejarlo vacío."
+        oninput="updateNotes(${step.id}, this.value)">${escapeHtml(s.notes || '')}</textarea>
+      <div class="evidence-label">📸 ¿Tenés una captura para mostrarnos?</div>
+      <div class="paste-zone" tabindex="0"
+           onclick="this.focus()"
+           onfocus="this.classList.add('focused')"
+           onblur="this.classList.remove('focused')"
+           onpaste="handlePaste(event, ${step.id})">
+        Clickeá acá y apretá <kbd>Ctrl</kbd>+<kbd>V</kbd> para pegar — o
+        <span class="upload-link" onclick="event.stopPropagation();document.getElementById('file-${step.id}').click()">elegí un archivo</span>
+      </div>
+      <input type="file" id="file-${step.id}" class="file-input" accept="image/*" multiple
+             onchange="handleFileUpload(event, ${step.id})">
+      <div class="gallery" id="gallery-${step.id}">${renderGallery(step.id)}</div>
+    </div>
+  `;
+  return card;
+}
+
+function renderGallery(stepId) {
+  const imgs = state.steps[stepId].images || [];
+  return imgs.map((img, i) => `
+    <div class="thumb">
+      <img src="${img}" alt="captura ${i+1}" onclick="openLightbox('${stepId}',${i})">
+      <button class="del" onclick="deleteImage(${stepId},${i})" title="Eliminar">✕</button>
+    </div>
+  `).join('');
+}
+
+function rerenderGallery(stepId) {
+  const el = document.getElementById('gallery-' + stepId);
+  if (el) el.innerHTML = renderGallery(stepId);
+}
+
+function rerenderStepCard(stepId) {
+  const old = document.querySelector(`.step-card[data-step-id="${stepId}"]`);
+  if (!old) return;
+  const step = STEPS.find(s => s.id === stepId);
+  if (!step) return;
+  const fresh = renderStep(step);
+  old.replaceWith(fresh);
+}
+
+function statusLabel(st) {
+  return {
+    ok: '✓ Funcionó',
+    fail: '✗ Con problemas',
+    skip: '— No probado',
+    pending: '○ Pendiente',
+  }[st];
+}
+
+function critLabel(c) {
+  return {
+    high: '🔴 Alta',
+    medium: '🟡 Media',
+    low: '🟢 Baja',
+  }[c || 'medium'];
+}
+
+// ============================================================================
+// Mutations
+// ============================================================================
+function setStatus(stepId, status) {
+  // Guard criticidad Alta: el botón "skip" está disabled, pero por si alguien
+  // manipula DOM o quedó un estado viejo cargado del localStorage, rechazamos.
+  if (status === 'skip') {
+    const step = STEPS.find(s => s.id === stepId);
+    if (step && step.criticality === 'high') {
+      toast('Esta prueba es de criticidad Alta — no se puede skipear. Marcala como "Funcionó" o "Algo salió mal".', 'err');
+      return;
+    }
+  }
+  state.steps[stepId].status = status;
+  saveState();
+  rerenderStepCard(stepId);
+  updateSummary();
+}
+
+function updateNotes(stepId, value) {
+  state.steps[stepId].notes = value;
+  saveState();
+}
+
+function handlePaste(e, stepId) {
+  const items = (e.clipboardData || window.clipboardData).items;
+  let found = false;
+  for (const item of items) {
+    if (item.type && item.type.startsWith('image/')) {
+      found = true;
+      e.preventDefault();
+      const file = item.getAsFile();
+      readFileAsDataURL(file).then(dataUrl => {
+        state.steps[stepId].images.push(dataUrl);
+        saveState();
+        rerenderGallery(stepId);
+        toast('Captura agregada');
+      });
+    }
+  }
+  if (!found) toast('No se encontró una imagen para pegar', 'err');
+}
+
+function handleFileUpload(e, stepId) {
+  const files = Array.from(e.target.files || []);
+  Promise.all(files.map(readFileAsDataURL)).then(urls => {
+    state.steps[stepId].images.push(...urls);
+    saveState();
+    rerenderGallery(stepId);
+    toast(`${urls.length} imagen(es) agregadas`);
+  });
+  e.target.value = '';
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+function deleteImage(stepId, idx) {
+  if (!confirm('¿Eliminar esta imagen?')) return;
+  state.steps[stepId].images.splice(idx, 1);
+  saveState();
+  rerenderGallery(stepId);
+}
+
+// Identity inputs
+['tester-name', 'tester-email', 'tester-browser', 'tester-date'].forEach((id) => {
+  document.getElementById(id).addEventListener('input', (e) => {
+    state.meta[id.replace('tester-', 'tester_')] = e.target.value;
+    saveState();
+  });
+});
+
+// ============================================================================
+// Summary + progress
+// ============================================================================
+function updateSummary() {
+  const counts = { ok: 0, fail: 0, skip: 0, pending: 0 };
+  for (const id of Object.keys(state.steps)) {
+    const st = state.steps[id].status;
+    counts[st] = (counts[st] || 0) + 1;
+  }
+  document.getElementById('count-ok').textContent = counts.ok;
+  document.getElementById('count-fail').textContent = counts.fail;
+  document.getElementById('count-skip').textContent = counts.skip;
+  document.getElementById('count-pending').textContent = counts.pending;
+  const done = counts.ok + counts.fail + counts.skip;
+  const pct = STEPS.length === 0 ? 0 : Math.round((done / STEPS.length) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+// ============================================================================
+// Lightbox
+// ============================================================================
+function openLightbox(stepId, idx) {
+  const img = state.steps[stepId].images[idx];
+  document.getElementById('lightbox-img').src = img;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+// ============================================================================
+// Export / Import / Reset
+// ============================================================================
+function exportJSON() {
+  // Validación blanda: avisar si nombre o email vacíos
+  if (!state.meta.tester_name && !state.meta.tester_email) {
+    if (!confirm('No completaste tu nombre ni tu correo arriba. ¿Querés descargar el reporte igual?')) return;
+  }
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const tsRaw = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const nameSlug = (state.meta.tester_name || 'anonimo').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'anonimo';
+  a.href = url;
+  a.download = `bois-prueba-admin-${nameSlug}-${tsRaw}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Reporte descargado a tu carpeta de Descargas');
+}
+
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const parsed = JSON.parse(r.result);
+      if (!parsed.steps || !parsed.meta) throw new Error('Archivo inválido');
+      if (!confirm('Vas a reemplazar lo que tenés acá ahora por el reporte que cargaste. ¿Seguro?')) return;
+      state = parsed;
+      const empty = emptyState();
+      for (const id of Object.keys(empty.steps)) {
+        if (!state.steps[id]) state.steps[id] = empty.steps[id];
+      }
+      saveState();
+      renderAll();
+      toast('Reporte cargado correctamente');
+    } catch (e) {
+      toast('Error: el archivo no es válido. ' + e.message, 'err');
+    }
+  };
+  r.readAsText(file);
+  input.value = '';
+}
+
+function resetAll() {
+  if (!confirm('Vas a borrar TODO tu progreso (capturas, notas, etc). ¿Seguro?')) return;
+  state = emptyState();
+  saveState();
+  renderAll();
+  toast('Empezando de nuevo');
+}
+
+// ============================================================================
+// Utils
+// ============================================================================
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+let toastTimer = null;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = (type === 'err') ? 'var(--fail)' : 'var(--ok)';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ============================================================================
+// Boot
+// ============================================================================
+renderAll();
+
+// Pre-fill fecha si está vacía
+if (!state.meta.tester_date) {
+  const today = new Date().toISOString().slice(0, 10);
+  state.meta.tester_date = today;
+  document.getElementById('tester-date').value = today;
+  saveState();
+}
+</script>
+</body>
+</html>

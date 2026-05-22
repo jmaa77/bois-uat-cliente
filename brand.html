@@ -1,0 +1,1276 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bois Bourgeois — Prueba para Marcas antes del lanzamiento</title>
+<style>
+  :root {
+    --primary: #0a3d62;
+    --primary-dark: #062840;
+    --accent: #f4b740;
+    --ok: #2e7d32;
+    --ok-bg: #e8f5e9;
+    --fail: #c62828;
+    --fail-bg: #ffebee;
+    --skip: #616161;
+    --skip-bg: #eeeeee;
+    --pending: #9e9e9e;
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #e0e0e0;
+    --text: #212121;
+    --text-soft: #616161;
+    --shadow: 0 1px 3px rgba(0,0,0,.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header.cover {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 32px 20px;
+    text-align: center;
+  }
+  header.cover h1 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 600;
+  }
+  header.cover p {
+    margin: 0;
+    opacity: .9;
+    font-size: 15px;
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  section.intro, section.summary, section.howto {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  section.intro h2 { color: var(--primary); margin-top: 0; }
+  section.intro ul, section.howto ul, section.howto ol { padding-left: 20px; }
+  section.intro li, section.howto li { margin-bottom: 6px; }
+  .info-box {
+    background: #fff8e1;
+    border-left: 4px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .info-box strong { color: var(--primary-dark); }
+
+  /* Identidad */
+  .identity {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .identity label { display: block; font-size: 13px; color: var(--text-soft); margin-bottom: 4px; }
+  .identity input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 14px;
+  }
+  @media (max-width: 540px) { .identity { grid-template-columns: 1fr; } }
+
+  /* Progreso */
+  .progress-card {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .chip.ok { background: var(--ok-bg); color: var(--ok); }
+  .chip.fail { background: var(--fail-bg); color: var(--fail); }
+  .chip.skip { background: var(--skip-bg); color: var(--skip); }
+  .chip.pending { background: #f5f5f5; color: var(--pending); }
+  .progress-bar-wrap { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+  .progress-bar-fill { height: 100%; background: var(--primary); transition: width .3s; }
+
+  /* Bloques + pasos */
+  .block { margin: 24px 0 8px; }
+  .block-title {
+    color: var(--primary);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent);
+  }
+  .step-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--pending);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+  }
+  .step-card.is-ok { border-left-color: var(--ok); }
+  .step-card.is-fail { border-left-color: var(--fail); }
+  .step-card.is-skip { border-left-color: var(--skip); }
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .step-number {
+    background: var(--primary);
+    color: white;
+    font-weight: 700;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .step-title { font-weight: 600; font-size: 16px; flex: 1; }
+  .step-status-chip {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+  .step-status-chip.ok { background: var(--ok-bg); color: var(--ok); }
+  .step-status-chip.fail { background: var(--fail-bg); color: var(--fail); }
+  .step-status-chip.skip { background: var(--skip-bg); color: var(--skip); }
+  .step-status-chip.pending { background: #f5f5f5; color: var(--pending); }
+
+  .step-criticality {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .step-criticality.crit-high { background: #ffebee; color: var(--fail); border: 1px solid var(--fail); }
+  .step-criticality.crit-medium { background: #fff8e1; color: #a8730a; border: 1px solid var(--accent); }
+  .step-criticality.crit-low { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok); }
+
+  .step-body { padding-left: 38px; }
+  .what-to-do, .what-to-see {
+    margin: 10px 0;
+  }
+  .what-to-do strong, .what-to-see strong {
+    display: block;
+    color: var(--primary-dark);
+    font-size: 13px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+  }
+  .what-to-do p, .what-to-see p { margin: 4px 0; }
+  .mockup {
+    background: #f8f9fb;
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 10px 0;
+    text-align: center;
+  }
+  .mockup-caption {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .mockup svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+
+  /* Status buttons */
+  .status-row {
+    display: flex;
+    gap: 8px;
+    margin: 14px 0 8px;
+    flex-wrap: wrap;
+  }
+  .status-btn {
+    border: 1px solid var(--border);
+    background: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all .15s;
+  }
+  .status-btn:hover { background: #f5f5f5; }
+  .status-btn.active.ok { background: var(--ok); color: white; border-color: var(--ok); }
+  .status-btn.active.fail { background: var(--fail); color: white; border-color: var(--fail); }
+  .status-btn.active.skip { background: var(--skip); color: white; border-color: var(--skip); }
+  .status-btn:disabled,
+  .status-btn.disabled-skip {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f5f5f5;
+    color: #999;
+    border-color: #ddd;
+  }
+  .status-btn:disabled:hover,
+  .status-btn.disabled-skip:hover {
+    background: #f5f5f5;
+  }
+
+  /* Notas + evidencia */
+  textarea.notes {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font: inherit;
+    font-size: 14px;
+    min-height: 70px;
+    resize: vertical;
+    margin-bottom: 8px;
+    background: white;
+  }
+  textarea.notes:focus { outline: none; border-color: var(--primary); }
+  .evidence-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-soft);
+    margin-bottom: 6px;
+    margin-top: 8px;
+  }
+  .paste-zone {
+    background: #f8f9fb;
+    border: 2px dashed var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-soft);
+    cursor: text;
+    transition: all .15s;
+  }
+  .paste-zone:focus, .paste-zone.focused {
+    outline: none;
+    border-color: var(--primary);
+    background: #f0f4f8;
+    color: var(--primary);
+  }
+  .file-input { display: none; }
+  .upload-link {
+    color: var(--primary);
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 600;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .gallery .thumb {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f5f5f5;
+    border: 1px solid var(--border);
+  }
+  .gallery .thumb img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    cursor: pointer;
+    display: block;
+  }
+  .gallery .thumb .del {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0,0,0,.7);
+    color: white;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.9);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 20px;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox img { max-width: 95vw; max-height: 95vh; object-fit: contain; }
+
+  /* Footer / export */
+  section.summary {
+    text-align: center;
+    background: var(--primary);
+    color: white;
+    border: none;
+  }
+  section.summary h2 { color: white; margin-top: 0; }
+  .big-btn {
+    background: var(--accent);
+    color: var(--primary-dark);
+    border: none;
+    padding: 14px 32px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 8px 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2);
+    transition: transform .1s;
+  }
+  .big-btn:hover { transform: translateY(-1px); }
+  .secondary-btn {
+    background: rgba(255,255,255,.15);
+    color: white;
+    border: 1px solid rgba(255,255,255,.3);
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 4px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--ok);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    z-index: 1100;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all .25s;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* HowTo */
+  section.howto {
+    background: #f5f9fc;
+    border-color: #c5d9e8;
+  }
+  section.howto h2 { color: var(--primary); margin-top: 0; }
+  .template-box {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  code { background: #f5f5f5; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  kbd {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <h1>Bois Bourgeois — Prueba para Marcas antes del lanzamiento</h1>
+  <p>Gracias por ayudarnos a probar la app desde la cuenta de tu marca antes de abrirla al público</p>
+</header>
+
+<main>
+
+<!-- ============ INTRO ============ -->
+<section class="intro">
+  <h2>¿Qué es esto?</h2>
+  <p>Antes de lanzar Bois Bourgeois al público, queremos asegurarnos de que <strong>todo funcione bien para vos como dueño/a de una marca</strong>. Te vamos a pedir que entres con la cuenta de tu marca y hagas las tareas más comunes: subir una prenda, manejar tu plan de suscripción, editar tu información, etc.</p>
+
+  <p><strong>No hay respuestas correctas o incorrectas.</strong> Tu opinión sincera nos ayuda a encontrar problemas antes de que los vea cualquier otra persona.</p>
+
+  <div class="info-box">
+    <strong>⏱ Tiempo estimado:</strong> 30 a 45 minutos. Podés tomarte pausas — el archivo guarda automáticamente tu progreso.<br>
+    <strong>💻 Necesitás:</strong> Una computadora con un navegador moderno (Chrome, Firefox, Edge o Safari) y acceso a internet.<br>
+    <strong>🔑 Vas a usar:</strong> El correo y contraseña de la cuenta de tu marca. Si todavía no la tenés, pedinos que te creemos una.<br>
+    <strong>📸 Vas a necesitar también:</strong> Algunas fotos de prendas tuyas (jpg o png) para probar subirlas.
+  </div>
+
+  <div class="info-box" style="border-left-color: #c62828; background: #fff5f5;">
+    <strong>🎯 Sobre la criticidad de cada prueba</strong><br>
+    Cada paso tiene un nivel de importancia visible arriba a la derecha del título:
+    <ul style="margin: 8px 0 4px 20px; padding: 0;">
+      <li><span class="step-criticality crit-high">🔴 Alta</span> Si esta prueba falla, NO podemos lanzar el sitio — son las cosas que tienen que funcionar sí o sí (login, pagos, subir o eliminar prendas).</li>
+      <li><span class="step-criticality crit-medium">🟡 Media</span> Si falla, podemos lanzar pero hay que arreglarlo pronto (cambios visuales, editar info).</li>
+      <li><span class="step-criticality crit-low">🟢 Baja</span> Si falla, lo podemos arreglar después del lanzamiento (casos especiales, navegación).</li>
+    </ul>
+    <strong>Importante:</strong> si encontrás un problema en una prueba de criticidad <strong>Alta</strong>, por favor reportalo apenas la termines — sin esperar a terminar toda la guía. Eso nos ayuda a resolverlo rápido.<br>
+    <strong>Las pruebas de criticidad Alta NO se pueden marcar como "No lo probé"</strong> — son obligatorias. Si tenés un problema con una de ellas marcala como "Algo salió mal" y contanos qué pasó.
+  </div>
+
+  <h3>Tus datos (para el reporte)</h3>
+  <p>Por favor completá estos campos antes de empezar:</p>
+  <div class="identity">
+    <div>
+      <label for="tester-name">Tu nombre</label>
+      <input type="text" id="tester-name" placeholder="Ej: Juan Pérez">
+    </div>
+    <div>
+      <label for="tester-email">Tu correo</label>
+      <input type="email" id="tester-email" placeholder="Ej: juan@ejemplo.com">
+    </div>
+    <div>
+      <label for="tester-browser">¿Qué navegador usás?</label>
+      <input type="text" id="tester-browser" placeholder="Ej: Chrome en Windows, Safari en Mac">
+    </div>
+    <div>
+      <label for="tester-date">Fecha de la prueba</label>
+      <input type="date" id="tester-date">
+    </div>
+  </div>
+
+  <div class="progress-card">
+    <div>
+      <span class="chip ok">✓ <span id="count-ok">0</span> funcionaron</span>
+      <span class="chip fail">✗ <span id="count-fail">0</span> con problemas</span>
+      <span class="chip skip">— <span id="count-skip">0</span> no probados</span>
+      <span class="chip pending">○ <span id="count-pending">0</span> pendientes</span>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+</section>
+
+<!-- ============ HOWTO ============ -->
+<section class="howto">
+  <h2>Antes de empezar — Cómo usar esta guía</h2>
+  <ol>
+    <li><strong>Abrí la app de Bois Bourgeois</strong> en otra pestaña del navegador. La dirección te la pasamos por separado.</li>
+    <li><strong>Mantené esta guía abierta</strong> en otra pestaña — vas a ir mirando lo que tenés que hacer.</li>
+    <li>Para cada paso:
+      <ul>
+        <li>Leé qué tenés que hacer en la app.</li>
+        <li>Hacelo en la otra pestaña.</li>
+        <li>Volvé acá y marcá si <strong>✓ Funcionó</strong>, <strong>✗ Algo salió mal</strong>, o <strong>— No lo probé</strong>.</li>
+        <li>Si algo salió mal: escribí qué pasó y pegá una captura (te explicamos cómo abajo).</li>
+      </ul>
+    </li>
+    <li>Cuando termines (o si querés pausar), clickeá <strong>⬇ Descargar reporte</strong> y mandanos el archivo que se descarga.</li>
+  </ol>
+
+  <h3>📸 Cómo pegar una captura de pantalla</h3>
+  <p>Si encontraste algo raro, una captura nos ayuda muchísimo:</p>
+  <ol>
+    <li>En Windows: apretá <kbd>Win</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd>, seleccioná lo que querés capturar, soltá. (En Mac: <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>4</kbd>.)</li>
+    <li>Volvé a esta guía, clickeá adentro del recuadro que dice <em>"Pegar evidencia"</em> en el paso correspondiente.</li>
+    <li>Apretá <kbd>Ctrl</kbd> + <kbd>V</kbd> (Mac: <kbd>Cmd</kbd> + <kbd>V</kbd>). La imagen aparece debajo.</li>
+  </ol>
+  <p>Si no podés con captura, alcanza con que escribas en el textarea qué pasó.</p>
+
+  <h3>📝 Cuando reportes un problema, intentá decir:</h3>
+  <div class="template-box">
+    QUÉ HICE: (ej: "Hice click en el botón Suscribirme")<br>
+    QUÉ ESPERABA VER: (ej: "Pensé que se abría un formulario de tarjeta")<br>
+    QUÉ PASÓ EN REALIDAD: (ej: "La página se quedó cargando 30 segundos y después dijo error")
+  </div>
+</section>
+
+<!-- ============ STEPS CONTAINER ============ -->
+<div id="steps-container"></div>
+
+<!-- ============ FINAL SECTION ============ -->
+<section class="summary">
+  <h2>¡Listo! ¿Cómo nos enviás tu reporte?</h2>
+  <p>Clickeá el botón grande y se descarga un archivo a tu computadora. Después subilo a la carpeta de Google Drive que te compartimos (o mandánoslo por correo).</p>
+  <button class="big-btn" onclick="exportJSON()">⬇ Descargar reporte</button>
+  <div style="margin-top:16px;">
+    <button class="secondary-btn" onclick="document.getElementById('import-file').click()">↑ Cargar reporte anterior</button>
+    <input type="file" id="import-file" class="file-input" accept="application/json" onchange="importJSON(this)">
+    <button class="secondary-btn" onclick="resetAll()">⟲ Empezar de nuevo</button>
+  </div>
+  <p style="font-size:13px; opacity:.8; margin-top:20px;">💡 <strong>Tip:</strong> Si necesitás cerrar la guía y volver después, no te preocupes — tu progreso queda guardado en este navegador. Si cambiás de navegador o computadora, primero <em>descargá el reporte</em> y después en la otra máquina abrí esta guía y <em>cargá el reporte anterior</em>.</p>
+</section>
+
+</main>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" alt="">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+// ============================================================================
+// MOCKUPS (SVG inline) — ilustraciones simples de lo que el cliente debería ver
+// ============================================================================
+const MOCKUPS = {
+  cookieBanner: `
+    <svg viewBox="0 0 360 130" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="130" fill="#fff" stroke="#ddd"/>
+      <rect x="80" y="30" width="200" height="80" rx="6" fill="#fffbeb" stroke="#f4b740" stroke-width="2"/>
+      <text x="180" y="55" font-family="sans-serif" font-size="11" fill="#5a4a1a" text-anchor="middle" font-weight="600">Política de Cookies</text>
+      <text x="180" y="73" font-family="sans-serif" font-size="9" fill="#5a4a1a" text-anchor="middle">Este sitio utiliza cookies necesarias</text>
+      <text x="180" y="85" font-family="sans-serif" font-size="9" fill="#5a4a1a" text-anchor="middle">para su funcionamiento.</text>
+      <rect x="148" y="92" width="64" height="20" rx="3" fill="#0a3d62"/>
+      <text x="180" y="106" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">Aceptar</text>
+    </svg>
+  `,
+
+  loginForm: `
+    <svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="200" fill="#fafafa"/>
+      <rect x="80" y="20" width="200" height="160" rx="6" fill="#fff" stroke="#ddd"/>
+      <text x="180" y="42" font-family="sans-serif" font-size="14" fill="#0a3d62" text-anchor="middle" font-weight="700">Iniciar sesión</text>
+      <rect x="100" y="60" width="160" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="108" y="75" font-family="sans-serif" font-size="10" fill="#999">Tu correo o usuario</text>
+      <rect x="100" y="92" width="160" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="108" y="107" font-family="sans-serif" font-size="10" fill="#999">Contraseña</text>
+      <rect x="100" y="124" width="160" height="22" rx="3" fill="#fafafa" stroke="#ccc"/>
+      <text x="180" y="139" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">[verificación de seguridad]</text>
+      <rect x="100" y="154" width="160" height="22" rx="3" fill="#0a3d62"/>
+      <text x="180" y="170" font-family="sans-serif" font-size="11" fill="#fff" text-anchor="middle" font-weight="600">Ingresar</text>
+    </svg>
+  `,
+
+  brandDashboard: `
+    <svg viewBox="0 0 360 240" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="240" fill="#fafafa"/>
+      <text x="180" y="22" font-family="sans-serif" font-size="13" fill="#0a3d62" text-anchor="middle" font-weight="700">Mi panel de marca</text>
+      <g>
+        <rect x="20" y="40" width="105" height="60" rx="6" fill="#fff" stroke="#ddd"/>
+        <text x="72" y="60" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">Prendas subidas</text>
+        <text x="72" y="84" font-family="sans-serif" font-size="20" fill="#0a3d62" text-anchor="middle" font-weight="700">12</text>
+      </g>
+      <g>
+        <rect x="135" y="40" width="105" height="60" rx="6" fill="#fff" stroke="#ddd"/>
+        <text x="187" y="60" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">Favoritos recibidos</text>
+        <text x="187" y="84" font-family="sans-serif" font-size="20" fill="#0a3d62" text-anchor="middle" font-weight="700">45</text>
+      </g>
+      <g>
+        <rect x="250" y="40" width="90" height="60" rx="6" fill="#fff" stroke="#ddd"/>
+        <text x="295" y="60" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">Clicks a tu sitio</text>
+        <text x="295" y="84" font-family="sans-serif" font-size="20" fill="#0a3d62" text-anchor="middle" font-weight="700">128</text>
+      </g>
+      <g>
+        <rect x="20" y="115" width="320" height="105" rx="6" fill="#fff" stroke="#ddd"/>
+        <text x="32" y="135" font-family="sans-serif" font-size="11" fill="#0a3d62" font-weight="700">Tu plan actual: Plus</text>
+        <text x="32" y="152" font-family="sans-serif" font-size="10" fill="#666">Vence el 21/06/2026</text>
+        <text x="32" y="178" font-family="sans-serif" font-size="10" fill="#212121" font-weight="600">Uso de prendas: 12 / 20</text>
+        <rect x="32" y="186" width="280" height="10" rx="5" fill="#eee"/>
+        <rect x="32" y="186" width="168" height="10" rx="5" fill="#f4b740"/>
+        <text x="312" y="194" font-family="sans-serif" font-size="9" fill="#666" text-anchor="end">60%</text>
+      </g>
+    </svg>
+  `,
+
+  uploadGaugeBars: `
+    <svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+      <text x="180" y="20" font-family="sans-serif" font-size="11" fill="#666" text-anchor="middle">La barra cambia de color según cuánto usaste:</text>
+      <g>
+        <text x="20" y="50" font-family="sans-serif" font-size="11" fill="#212121" font-weight="600">Verde (todo OK, hasta 60%):</text>
+        <rect x="20" y="58" width="320" height="14" rx="7" fill="#eee"/>
+        <rect x="20" y="58" width="100" height="14" rx="7" fill="#2e7d32"/>
+        <text x="340" y="69" font-family="sans-serif" font-size="10" fill="#666" text-anchor="end">30%</text>
+      </g>
+      <g>
+        <text x="20" y="100" font-family="sans-serif" font-size="11" fill="#212121" font-weight="600">Amarillo (cerca del límite, 60-80%):</text>
+        <rect x="20" y="108" width="320" height="14" rx="7" fill="#eee"/>
+        <rect x="20" y="108" width="240" height="14" rx="7" fill="#f4b740"/>
+        <text x="340" y="119" font-family="sans-serif" font-size="10" fill="#666" text-anchor="end">75%</text>
+      </g>
+      <g>
+        <text x="20" y="150" font-family="sans-serif" font-size="11" fill="#212121" font-weight="600">Rojo (alcanzaste el tope, 80%+):</text>
+        <rect x="20" y="158" width="320" height="14" rx="7" fill="#eee"/>
+        <rect x="20" y="158" width="320" height="14" rx="7" fill="#c62828"/>
+        <text x="340" y="169" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="end">100%</text>
+      </g>
+    </svg>
+  `,
+
+  uploadClothForm: `
+    <svg viewBox="0 0 360 250" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="250" fill="#fafafa"/>
+      <rect x="20" y="15" width="320" height="220" rx="6" fill="#fff" stroke="#ddd"/>
+      <text x="180" y="36" font-family="sans-serif" font-size="13" fill="#0a3d62" text-anchor="middle" font-weight="700">Subir una prenda</text>
+      <text x="32" y="58" font-family="sans-serif" font-size="10" fill="#666">Nombre</text>
+      <rect x="32" y="64" width="296" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="40" y="79" font-family="sans-serif" font-size="10" fill="#999">Ej: Remera lino crema</text>
+      <text x="32" y="100" font-family="sans-serif" font-size="10" fill="#666">Precio (ARS)</text>
+      <rect x="32" y="106" width="140" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="40" y="121" font-family="sans-serif" font-size="10" fill="#999">18500</text>
+      <text x="188" y="100" font-family="sans-serif" font-size="10" fill="#666">Categoría</text>
+      <rect x="188" y="106" width="140" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="196" y="121" font-family="sans-serif" font-size="10" fill="#999">Remeras ▼</text>
+      <text x="32" y="142" font-family="sans-serif" font-size="10" fill="#666">Foto</text>
+      <rect x="32" y="148" width="100" height="60" rx="3" fill="#fafafa" stroke="#ccc" stroke-dasharray="4,2"/>
+      <text x="82" y="183" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">+ Subir imagen</text>
+      <rect x="148" y="180" width="80" height="22" rx="3" fill="#fff" stroke="#bbb"/>
+      <text x="188" y="195" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">Cancelar</text>
+      <rect x="240" y="180" width="88" height="22" rx="3" fill="#0a3d62"/>
+      <text x="284" y="195" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">Guardar</text>
+    </svg>
+  `,
+
+  clothListBrand: `
+    <svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="200" fill="#fafafa"/>
+      <text x="20" y="22" font-family="sans-serif" font-size="13" fill="#0a3d62" font-weight="700">Tus prendas</text>
+      <rect x="240" y="10" width="100" height="22" rx="3" fill="#0a3d62"/>
+      <text x="290" y="25" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">+ Nueva prenda</text>
+      <g>
+        <rect x="20" y="40" width="320" height="46" rx="4" fill="#fff" stroke="#ddd"/>
+        <rect x="28" y="48" width="32" height="32" rx="3" fill="#e0e7ee"/>
+        <text x="68" y="60" font-family="sans-serif" font-size="11" fill="#212121" font-weight="600">Remera lino crema</text>
+        <text x="68" y="74" font-family="sans-serif" font-size="10" fill="#666">ARS 18.500</text>
+        <rect x="220" y="55" width="50" height="20" rx="3" fill="#fff" stroke="#999"/>
+        <text x="245" y="68" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Editar</text>
+        <rect x="278" y="55" width="50" height="20" rx="3" fill="#fff" stroke="#c62828"/>
+        <text x="303" y="68" font-family="sans-serif" font-size="9" fill="#c62828" text-anchor="middle">Borrar</text>
+      </g>
+      <g>
+        <rect x="20" y="94" width="320" height="46" rx="4" fill="#fff" stroke="#ddd"/>
+        <rect x="28" y="102" width="32" height="32" rx="3" fill="#e0e7ee"/>
+        <text x="68" y="114" font-family="sans-serif" font-size="11" fill="#212121" font-weight="600">Jean clásico azul</text>
+        <text x="68" y="128" font-family="sans-serif" font-size="10" fill="#666">ARS 24.000</text>
+        <rect x="220" y="109" width="50" height="20" rx="3" fill="#fff" stroke="#999"/>
+        <text x="245" y="122" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Editar</text>
+        <rect x="278" y="109" width="50" height="20" rx="3" fill="#fff" stroke="#c62828"/>
+        <text x="303" y="122" font-family="sans-serif" font-size="9" fill="#c62828" text-anchor="middle">Borrar</text>
+      </g>
+      <text x="180" y="175" font-family="sans-serif" font-size="10" fill="#999" text-anchor="middle">Cada fila es una de tus prendas — con botones para editarla o borrarla</text>
+    </svg>
+  `,
+
+  magazineUpload: `
+    <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="220" fill="#fafafa"/>
+      <text x="20" y="22" font-family="sans-serif" font-size="13" fill="#0a3d62" font-weight="700">Tu revista</text>
+      <text x="20" y="40" font-family="sans-serif" font-size="10" fill="#666">Vas a usar 4 de 10 imágenes permitidas en tu plan Plus</text>
+      <rect x="20" y="55" width="100" height="80" rx="4" fill="#fff" stroke="#ddd"/>
+      <rect x="28" y="63" width="84" height="48" fill="#e0e7ee"/>
+      <text x="70" y="89" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">[foto 1]</text>
+      <text x="28" y="123" font-family="sans-serif" font-size="9" fill="#666">Look invierno</text>
+      <rect x="130" y="55" width="100" height="80" rx="4" fill="#fff" stroke="#ddd"/>
+      <rect x="138" y="63" width="84" height="48" fill="#e0e7ee"/>
+      <text x="180" y="89" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">[foto 2]</text>
+      <text x="138" y="123" font-family="sans-serif" font-size="9" fill="#666">Editorial primavera</text>
+      <rect x="240" y="55" width="100" height="80" rx="4" fill="#fafafa" stroke="#ccc" stroke-dasharray="4,2"/>
+      <text x="290" y="100" font-family="sans-serif" font-size="20" fill="#999" text-anchor="middle">+</text>
+      <text x="290" y="115" font-family="sans-serif" font-size="9" fill="#999" text-anchor="middle">Agregar</text>
+      <text x="20" y="160" font-family="sans-serif" font-size="11" fill="#0a3d62" font-weight="700">¿Cómo se ve la revista publicada?</text>
+      <text x="20" y="175" font-family="sans-serif" font-size="10" fill="#666">Andá a /magazine para verla como cualquier usuario.</text>
+    </svg>
+  `,
+
+  brandEditForm: `
+    <svg viewBox="0 0 360 230" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="230" fill="#fafafa"/>
+      <rect x="20" y="15" width="320" height="200" rx="6" fill="#fff" stroke="#ddd"/>
+      <text x="180" y="36" font-family="sans-serif" font-size="13" fill="#0a3d62" text-anchor="middle" font-weight="700">Información de tu marca</text>
+      <text x="32" y="58" font-family="sans-serif" font-size="10" fill="#666">Nombre que ven los usuarios</text>
+      <rect x="32" y="64" width="296" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="40" y="79" font-family="sans-serif" font-size="10" fill="#212121">Mi Marca de Ejemplo</text>
+      <text x="32" y="100" font-family="sans-serif" font-size="10" fill="#666">Descripción</text>
+      <rect x="32" y="106" width="296" height="50" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="40" y="121" font-family="sans-serif" font-size="10" fill="#212121">Diseñamos ropa sustentable...</text>
+      <text x="32" y="172" font-family="sans-serif" font-size="10" fill="#666">Ubicación</text>
+      <rect x="32" y="178" width="200" height="22" rx="3" fill="#fff" stroke="#ccc"/>
+      <text x="40" y="193" font-family="sans-serif" font-size="10" fill="#212121">Buenos Aires</text>
+      <rect x="240" y="178" width="88" height="22" rx="3" fill="#0a3d62"/>
+      <text x="284" y="193" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">Guardar</text>
+    </svg>
+  `,
+
+  pricingPlans: `
+    <svg viewBox="0 0 360 240" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="240" fill="#fafafa"/>
+      <text x="180" y="25" font-family="sans-serif" font-size="13" fill="#0a3d62" text-anchor="middle" font-weight="700">Planes para tu marca</text>
+      <g>
+        <rect x="30" y="45" width="140" height="170" rx="6" fill="#fff" stroke="#ddd"/>
+        <text x="100" y="68" font-family="sans-serif" font-size="14" fill="#0a3d62" text-anchor="middle" font-weight="700">Plus</text>
+        <text x="100" y="92" font-family="sans-serif" font-size="18" fill="#212121" text-anchor="middle" font-weight="700">$ 69.000</text>
+        <text x="100" y="106" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">por mes</text>
+        <text x="100" y="130" font-family="sans-serif" font-size="10" fill="#212121" text-anchor="middle">20 prendas</text>
+        <text x="100" y="146" font-family="sans-serif" font-size="10" fill="#212121" text-anchor="middle">10 imágenes revista</text>
+        <rect x="50" y="178" width="100" height="26" rx="4" fill="#0a3d62"/>
+        <text x="100" y="195" font-family="sans-serif" font-size="11" fill="#fff" text-anchor="middle" font-weight="600">Elegir Plus</text>
+      </g>
+      <g>
+        <rect x="190" y="45" width="140" height="170" rx="6" fill="#fff" stroke="#f4b740" stroke-width="2"/>
+        <rect x="220" y="38" width="80" height="18" rx="3" fill="#f4b740"/>
+        <text x="260" y="51" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">Más elegido</text>
+        <text x="260" y="78" font-family="sans-serif" font-size="14" fill="#0a3d62" text-anchor="middle" font-weight="700">Premium</text>
+        <text x="260" y="102" font-family="sans-serif" font-size="18" fill="#212121" text-anchor="middle" font-weight="700">$ 169.000</text>
+        <text x="260" y="116" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">por mes</text>
+        <text x="260" y="140" font-family="sans-serif" font-size="10" fill="#212121" text-anchor="middle">Prendas ilimitadas</text>
+        <text x="260" y="156" font-family="sans-serif" font-size="10" fill="#212121" text-anchor="middle">Revista ilimitada</text>
+        <rect x="210" y="178" width="100" height="26" rx="4" fill="#f4b740"/>
+        <text x="260" y="195" font-family="sans-serif" font-size="11" fill="#fff" text-anchor="middle" font-weight="600">Elegir Premium</text>
+      </g>
+    </svg>
+  `,
+
+  cancelDialog: `
+    <svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="200" fill="rgba(0,0,0,.4)"/>
+      <rect x="40" y="30" width="280" height="140" rx="8" fill="#fff" stroke="#ddd"/>
+      <text x="180" y="58" font-family="sans-serif" font-size="13" fill="#0a3d62" text-anchor="middle" font-weight="700">¿Cancelar tu suscripción?</text>
+      <text x="180" y="84" font-family="sans-serif" font-size="11" fill="#444" text-anchor="middle">Tu plan sigue activo hasta el 21/06/2026.</text>
+      <text x="180" y="100" font-family="sans-serif" font-size="11" fill="#444" text-anchor="middle">Después de esa fecha tu marca vuelve al estado</text>
+      <text x="180" y="115" font-family="sans-serif" font-size="11" fill="#444" text-anchor="middle">gratuito y se borran las prendas publicadas.</text>
+      <rect x="70" y="135" width="100" height="26" rx="4" fill="#fff" stroke="#bbb"/>
+      <text x="120" y="152" font-family="sans-serif" font-size="11" fill="#666" text-anchor="middle">Mejor no</text>
+      <rect x="190" y="135" width="100" height="26" rx="4" fill="#c62828"/>
+      <text x="240" y="152" font-family="sans-serif" font-size="11" fill="#fff" text-anchor="middle" font-weight="600">Sí, cancelar</text>
+    </svg>
+  `,
+};
+
+// ============================================================================
+// PASOS DE LA PRUEBA
+// ============================================================================
+const STEPS = [
+  // ----- BLOCK A: ENTRAR A TU CUENTA -----
+  { id: 1, block: 'Entrar a tu cuenta', n: 1,
+    criticality: 'medium',
+    title: 'Abrir el sitio y aceptar las cookies',
+    doStr: 'Abrí la dirección que te pasamos en una pestaña nueva del navegador. Esperá que cargue. Si aparece un cartelito de cookies, clickeá "Aceptar".',
+    seeStr: 'Se ve el sitio con el logo "BOIS BOURGEOIS" arriba y prendas sugeridas. El cartel de cookies desaparece al aceptarlo.',
+    mockup: 'cookieBanner',
+    mockupCaption: 'El cartel de cookies se ve aproximadamente así',
+  },
+  { id: 2, block: 'Entrar a tu cuenta', n: 2,
+    criticality: 'high',
+    title: 'Iniciar sesión con la cuenta de tu marca',
+    doStr: 'Buscá el botón "Ingresar" arriba a la derecha. Clickealo. Completá el correo (o usuario) y la contraseña que te pasamos. Si te pide una verificación de seguridad ("captcha"), completala. Clickeá "Ingresar".',
+    seeStr: 'Se carga la página principal pero ahora arriba a la derecha aparece tu nombre/usuario (en vez del botón "Ingresar"). Eso confirma que estás logueado/a.',
+    mockup: 'loginForm',
+    mockupCaption: 'El formulario de inicio de sesión',
+  },
+  { id: 3, block: 'Entrar a tu cuenta', n: 3,
+    criticality: 'high',
+    title: 'Llegar al panel de tu marca',
+    doStr: 'Buscá un link o botón que diga "Mi cuenta", "Perfil" o "Panel" (suele estar arriba a la derecha donde está tu nombre). Adentro, buscá la sección "Dashboard" o "Panel de marca".',
+    seeStr: 'Se ve un panel con cards de números (cuántas prendas tenés subidas, cuántos favoritos recibiste, etc.) y una barra que muestra cuánto usaste de tu plan actual.',
+    mockup: 'brandDashboard',
+    mockupCaption: 'El panel de tu marca debería verse aproximadamente así',
+  },
+
+  // ----- BLOCK B: TU SUSCRIPCIÓN -----
+  { id: 4, block: 'Tu suscripción', n: 4,
+    criticality: 'medium',
+    title: 'Ver tu plan actual y tu barra de uso',
+    doStr: 'En el panel de tu marca, fijate en la sección "Tu plan actual" o "Suscripción". Vas a ver el nombre del plan (Plus o Premium), la fecha de vencimiento, y una barra que muestra cuántas prendas tenés subidas de tu límite.',
+    seeStr: 'La barra está verde si usaste poco, amarilla si estás cerca del límite (más del 60%), o roja si llegaste al tope. Si tu plan es Premium, la barra dice "Sin límite" o algo parecido.',
+    mockup: 'uploadGaugeBars',
+    mockupCaption: 'Los 3 colores posibles de la barra de uso',
+  },
+  { id: 5, block: 'Tu suscripción', n: 5,
+    criticality: 'medium',
+    title: 'Ver los planes disponibles para tu marca',
+    doStr: 'Andá al menú de arriba y clickeá "Planes" o entrá directamente a la dirección + "/pricing". Si la página te pregunta si sos Usuario o Marca, elegí la pestaña "Marca".',
+    seeStr: 'Aparecen las dos opciones de plan disponibles para marcas: "Plus" ($ 69.000/mes, 20 prendas) y "Premium" ($ 169.000/mes, prendas ilimitadas). Premium puede tener un cartelito tipo "Más elegido".',
+    mockup: 'pricingPlans',
+    mockupCaption: 'Los dos planes para marcas',
+  },
+  { id: 6, block: 'Tu suscripción', n: 6,
+    criticality: 'high',
+    title: 'Probar de cambiar de plan (sin completar el pago)',
+    doStr: 'Volvé a tu perfil o panel. Buscá un botón "Cambiar plan", "Mejorar plan" o "Suscribirme". Clickealo y elegí el plan que NO tenés actualmente. Cuando te pida confirmación, se abre una pestaña con un formulario de Mercado Pago. NO completes el pago, solo verificá que se abre el formulario.',
+    seeStr: 'Se abre una pestaña nueva con el logo de Mercado Pago y un formulario para ingresar tarjeta. Esto significa que el cambio de plan funciona correctamente. Cerrá esa pestaña sin completar el pago.',
+  },
+  { id: 7, block: 'Tu suscripción', n: 7,
+    criticality: 'high',
+    title: 'Probar el cancelar suscripción (sin confirmar)',
+    doStr: 'En el panel o perfil, buscá un botón o link "Cancelar suscripción". Clickealo. Va a aparecer un cartel de confirmación que te explica qué pasa si cancelás. LEÉLO BIEN pero NO confirmes — clickeá "Mejor no" o cerrá el cartel.',
+    seeStr: 'El cartel debería decir que tu plan sigue activo hasta la fecha de vencimiento, y que después de esa fecha tu marca queda en estado gratuito (sin acceso a publicar). Si dice algo confuso o que asusta, contanos.',
+    mockup: 'cancelDialog',
+    mockupCaption: 'El cartel de confirmación para cancelar',
+  },
+
+  // ----- BLOCK C: TUS PRENDAS -----
+  { id: 8, block: 'Tus prendas', n: 8,
+    criticality: 'medium',
+    title: 'Ir al panel de tus prendas',
+    doStr: 'Desde el panel de tu marca, buscá una pestaña o link que diga "Prendas", "Ropa" o "Mi catálogo".',
+    seeStr: 'Aparece una lista con todas las prendas que tu marca tiene subidas. Cada prenda tiene una mini-foto, su nombre, precio, y botones para "Editar" o "Borrar".',
+    mockup: 'clothListBrand',
+    mockupCaption: 'El listado de tus prendas',
+  },
+  { id: 9, block: 'Tus prendas', n: 9,
+    criticality: 'high',
+    title: 'Subir una prenda nueva',
+    doStr: 'En el panel de prendas, clickeá el botón "+ Nueva prenda" o "Agregar". Completá los datos: nombre, precio, categoría (remera, jean, etc.), género, talle. Subí una foto desde tu computadora. Clickeá "Guardar".',
+    seeStr: 'La prenda aparece en la lista. Si volvés al catálogo principal del sitio y buscás tu marca, deberías ver la prenda nueva ahí también. Si el contador de "prendas subidas" en tu panel aumentó en 1, perfecto.',
+    mockup: 'uploadClothForm',
+    mockupCaption: 'El formulario para subir una prenda nueva',
+  },
+  { id: 10, block: 'Tus prendas', n: 10,
+    criticality: 'medium',
+    title: 'Editar una prenda',
+    doStr: 'En la lista de prendas, elegí cualquier prenda (recomendamos la que acabás de crear). Clickeá "Editar". Cambiá algo simple — por ejemplo, modificá el precio o agregale algo al nombre. Guardá.',
+    seeStr: 'Volvés a la lista y los cambios se ven reflejados (precio nuevo, nombre con lo que agregaste). Si entrás al catálogo principal del sitio, también deberías ver los cambios ahí.',
+  },
+  { id: 11, block: 'Tus prendas', n: 11,
+    criticality: 'high',
+    title: 'Eliminar una prenda (con cuidado)',
+    doStr: 'Elegí UNA prenda que NO te importe perder (idealmente la de prueba que creaste en el paso 9). Clickeá "Borrar" o el ícono de papelera. Confirmá si te pregunta.',
+    seeStr: 'La prenda desaparece de la lista. El contador de "prendas subidas" en tu panel debería bajar en 1. Si entrás al catálogo principal, la prenda ya no aparece más.',
+  },
+
+  // ----- BLOCK D: TU REVISTA (MAGAZINE) -----
+  { id: 12, block: 'Tu revista (Magazine)', n: 12,
+    criticality: 'low',
+    title: 'Ir al panel de tu revista',
+    doStr: 'En el panel de tu marca, buscá una pestaña o link "Revista", "Magazine" o "Contenido editorial".',
+    seeStr: 'Aparece un panel con las imágenes que tenés subidas a tu revista (si ya tenías). Si no tenés ninguna todavía, vas a ver un mensaje como "Todavía no subiste contenido" y un botón para agregar.',
+    mockup: 'magazineUpload',
+    mockupCaption: 'El panel de tu revista',
+  },
+  { id: 13, block: 'Tu revista (Magazine)', n: 13,
+    criticality: 'medium',
+    title: 'Subir una imagen al magazine',
+    doStr: 'Clickeá el botón "+" o "Agregar contenido" en el panel de magazine. Subí una foto editorial (puede ser un look completo, un detalle, lo que quieras). Ponele un título corto si te lo pide. Guardá.',
+    seeStr: 'La nueva imagen aparece en tu panel de magazine. Si vas a la página pública de tu marca o a la sección "Revista" del sitio, la imagen también debería verse ahí.',
+  },
+  { id: 14, block: 'Tu revista (Magazine)', n: 14,
+    criticality: 'low',
+    title: 'Probar el límite del magazine (opcional — solo si tenés plan Plus)',
+    doStr: 'Si tu plan es Plus, podés subir hasta 10 imágenes al magazine. Si querés probar el bloqueo: subí imágenes hasta llegar al límite (o pedinos que te dejemos cerca del límite). Después intentá subir UNA MÁS — debería aparecer un mensaje de "alcanzaste el límite".',
+    seeStr: 'El mensaje te avisa que llegaste al tope y te sugiere mejorar a Premium. Si tu plan es Premium, este paso NO aplica (no tenés límite). Marcá "No lo probé" si no hace falta.',
+  },
+
+  // ----- BLOCK E: INFORMACIÓN DE TU MARCA -----
+  { id: 15, block: 'Información de tu marca', n: 15,
+    criticality: 'medium',
+    title: 'Editar la información pública de tu marca',
+    doStr: 'En el panel, buscá una sección "Mi marca", "Editar marca" o algo parecido. Vas a ver un formulario con el nombre comercial de tu marca, descripción, ubicación. Modificá algo pequeño — por ejemplo agregale un punto a la descripción. Guardá.',
+    seeStr: 'Después de guardar, los cambios se ven reflejados al instante en el panel. Si entrás a la página pública de tu marca (link tipo "Ver mi marca" o tu nombre en el catálogo), la descripción nueva debería aparecer ahí.',
+    mockup: 'brandEditForm',
+    mockupCaption: 'El formulario de edición de marca',
+  },
+  { id: 16, block: 'Información de tu marca', n: 16,
+    criticality: 'low',
+    title: 'Ver tu marca como la ven los usuarios',
+    doStr: 'Salí de tu cuenta (clickeá "Cerrar sesión" o abrí el sitio en una ventana de incógnito). Buscá tu marca en el catálogo principal — escribí el nombre de tu marca en la barra de búsqueda y clickeala. O entrá directo a "/brand/" + tu ID.',
+    seeStr: 'Se ve la página pública de tu marca: tu nombre, descripción, ubicación, y todas las prendas que subiste. Si tenés magazine, también se ve. Verificá que la información esté correcta y que las prendas y fotos se vean bien.',
+  },
+];
+
+// ============================================================================
+// State management
+// ============================================================================
+const STORAGE_KEY = 'bois-uat-brand-v1';
+
+function emptyState() {
+  return {
+    version: 1,
+    meta: {
+      tester_name: '', tester_email: '', tester_browser: '', tester_date: '',
+      started_at: new Date().toISOString(),
+      last_saved_at: null,
+    },
+    steps: Object.fromEntries(
+      STEPS.map(s => [s.id, { status: 'pending', notes: '', images: [] }])
+    ),
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return emptyState();
+    const parsed = JSON.parse(raw);
+    const empty = emptyState();
+    for (const id of Object.keys(empty.steps)) {
+      if (!parsed.steps[id]) parsed.steps[id] = empty.steps[id];
+    }
+    return parsed;
+  } catch (e) {
+    return emptyState();
+  }
+}
+
+function saveState() {
+  state.meta.last_saved_at = new Date().toISOString();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    toast('No se pudo guardar — el archivo está demasiado lleno. Descargá el reporte y empezá de nuevo.', 'err');
+  }
+}
+
+let state = loadState();
+
+// ============================================================================
+// Render
+// ============================================================================
+function renderAll() {
+  document.getElementById('tester-name').value = state.meta.tester_name || '';
+  document.getElementById('tester-email').value = state.meta.tester_email || '';
+  document.getElementById('tester-browser').value = state.meta.tester_browser || '';
+  document.getElementById('tester-date').value = state.meta.tester_date || '';
+
+  const container = document.getElementById('steps-container');
+  container.innerHTML = '';
+  let currentBlock = null;
+  for (const step of STEPS) {
+    if (step.block !== currentBlock) {
+      currentBlock = step.block;
+      const blockDiv = document.createElement('div');
+      blockDiv.className = 'block';
+      blockDiv.innerHTML = `<h2 class="block-title">${escapeHtml(step.block)}</h2>`;
+      container.appendChild(blockDiv);
+    }
+    container.appendChild(renderStep(step));
+  }
+  updateSummary();
+}
+
+function renderStep(step) {
+  const s = state.steps[step.id];
+  const card = document.createElement('div');
+  card.className = `step-card is-${s.status}`;
+  card.dataset.stepId = step.id;
+
+  const mockupHtml = step.mockup
+    ? `<div class="mockup">${MOCKUPS[step.mockup] || ''}<div class="mockup-caption">${escapeHtml(step.mockupCaption || '')}</div></div>`
+    : '';
+
+  card.innerHTML = `
+    <div class="step-head">
+      <span class="step-number">${escapeHtml(String(step.n))}</span>
+      <span class="step-title">${escapeHtml(step.title)}</span>
+      <span class="step-criticality crit-${step.criticality || 'medium'}" title="Criticidad de la prueba">${critLabel(step.criticality)}</span>
+      <span class="step-status-chip ${s.status}">${statusLabel(s.status)}</span>
+    </div>
+    <div class="step-body">
+      <div class="what-to-do">
+        <strong>👉 Qué tenés que hacer</strong>
+        <p>${escapeHtml(step.doStr)}</p>
+      </div>
+      <div class="what-to-see">
+        <strong>👁 Qué deberías ver</strong>
+        <p>${escapeHtml(step.seeStr)}</p>
+      </div>
+      ${mockupHtml}
+      <div class="status-row">
+        <button class="status-btn ${s.status === 'ok' ? 'active ok' : ''}" onclick="setStatus(${step.id}, 'ok')">✓ Funcionó</button>
+        <button class="status-btn ${s.status === 'fail' ? 'active fail' : ''}" onclick="setStatus(${step.id}, 'fail')">✗ Algo salió mal</button>
+        <button
+          class="status-btn ${s.status === 'skip' ? 'active skip' : ''}${step.criticality === 'high' ? ' disabled-skip' : ''}"
+          ${step.criticality === 'high' ? 'disabled title="No se puede skipear: criticidad Alta — esta prueba debe completarse para validar el lanzamiento"' : ''}
+          onclick="setStatus(${step.id}, 'skip')">— No lo probé</button>
+      </div>
+      <textarea class="notes"
+        placeholder="¿Algo para contarnos? Si algo salió mal, contanos qué pasó (qué hiciste, qué esperabas, qué viste). Si todo OK, podés dejarlo vacío."
+        oninput="updateNotes(${step.id}, this.value)">${escapeHtml(s.notes || '')}</textarea>
+      <div class="evidence-label">📸 ¿Tenés una captura para mostrarnos?</div>
+      <div class="paste-zone" tabindex="0"
+           onclick="this.focus()"
+           onfocus="this.classList.add('focused')"
+           onblur="this.classList.remove('focused')"
+           onpaste="handlePaste(event, ${step.id})">
+        Clickeá acá y apretá <kbd>Ctrl</kbd>+<kbd>V</kbd> para pegar — o
+        <span class="upload-link" onclick="event.stopPropagation();document.getElementById('file-${step.id}').click()">elegí un archivo</span>
+      </div>
+      <input type="file" id="file-${step.id}" class="file-input" accept="image/*" multiple
+             onchange="handleFileUpload(event, ${step.id})">
+      <div class="gallery" id="gallery-${step.id}">${renderGallery(step.id)}</div>
+    </div>
+  `;
+  return card;
+}
+
+function renderGallery(stepId) {
+  const imgs = state.steps[stepId].images || [];
+  return imgs.map((img, i) => `
+    <div class="thumb">
+      <img src="${img}" alt="captura ${i+1}" onclick="openLightbox('${stepId}',${i})">
+      <button class="del" onclick="deleteImage(${stepId},${i})" title="Eliminar">✕</button>
+    </div>
+  `).join('');
+}
+
+function rerenderGallery(stepId) {
+  const el = document.getElementById('gallery-' + stepId);
+  if (el) el.innerHTML = renderGallery(stepId);
+}
+
+function rerenderStepCard(stepId) {
+  const old = document.querySelector(`.step-card[data-step-id="${stepId}"]`);
+  if (!old) return;
+  const step = STEPS.find(s => s.id === stepId);
+  if (!step) return;
+  const fresh = renderStep(step);
+  old.replaceWith(fresh);
+}
+
+function statusLabel(st) {
+  return {
+    ok: '✓ Funcionó',
+    fail: '✗ Con problemas',
+    skip: '— No probado',
+    pending: '○ Pendiente',
+  }[st];
+}
+
+function critLabel(c) {
+  return {
+    high: '🔴 Alta',
+    medium: '🟡 Media',
+    low: '🟢 Baja',
+  }[c || 'medium'];
+}
+
+// ============================================================================
+// Mutations
+// ============================================================================
+function setStatus(stepId, status) {
+  // Guard criticidad Alta: el botón "skip" está disabled, pero por si alguien
+  // manipula DOM o quedó un estado viejo cargado del localStorage, rechazamos.
+  if (status === 'skip') {
+    const step = STEPS.find(s => s.id === stepId);
+    if (step && step.criticality === 'high') {
+      toast('Esta prueba es de criticidad Alta — no se puede skipear. Marcala como "Funcionó" o "Algo salió mal".', 'err');
+      return;
+    }
+  }
+  state.steps[stepId].status = status;
+  saveState();
+  rerenderStepCard(stepId);
+  updateSummary();
+}
+
+function updateNotes(stepId, value) {
+  state.steps[stepId].notes = value;
+  saveState();
+}
+
+function handlePaste(e, stepId) {
+  const items = (e.clipboardData || window.clipboardData).items;
+  let found = false;
+  for (const item of items) {
+    if (item.type && item.type.startsWith('image/')) {
+      found = true;
+      e.preventDefault();
+      const file = item.getAsFile();
+      readFileAsDataURL(file).then(dataUrl => {
+        state.steps[stepId].images.push(dataUrl);
+        saveState();
+        rerenderGallery(stepId);
+        toast('Captura agregada');
+      });
+    }
+  }
+  if (!found) toast('No se encontró una imagen para pegar', 'err');
+}
+
+function handleFileUpload(e, stepId) {
+  const files = Array.from(e.target.files || []);
+  Promise.all(files.map(readFileAsDataURL)).then(urls => {
+    state.steps[stepId].images.push(...urls);
+    saveState();
+    rerenderGallery(stepId);
+    toast(`${urls.length} imagen(es) agregadas`);
+  });
+  e.target.value = '';
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+function deleteImage(stepId, idx) {
+  if (!confirm('¿Eliminar esta imagen?')) return;
+  state.steps[stepId].images.splice(idx, 1);
+  saveState();
+  rerenderGallery(stepId);
+}
+
+// Identity inputs
+['tester-name', 'tester-email', 'tester-browser', 'tester-date'].forEach((id) => {
+  document.getElementById(id).addEventListener('input', (e) => {
+    state.meta[id.replace('tester-', 'tester_')] = e.target.value;
+    saveState();
+  });
+});
+
+// ============================================================================
+// Summary + progress
+// ============================================================================
+function updateSummary() {
+  const counts = { ok: 0, fail: 0, skip: 0, pending: 0 };
+  for (const id of Object.keys(state.steps)) {
+    const st = state.steps[id].status;
+    counts[st] = (counts[st] || 0) + 1;
+  }
+  document.getElementById('count-ok').textContent = counts.ok;
+  document.getElementById('count-fail').textContent = counts.fail;
+  document.getElementById('count-skip').textContent = counts.skip;
+  document.getElementById('count-pending').textContent = counts.pending;
+  const done = counts.ok + counts.fail + counts.skip;
+  const pct = STEPS.length === 0 ? 0 : Math.round((done / STEPS.length) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+// ============================================================================
+// Lightbox
+// ============================================================================
+function openLightbox(stepId, idx) {
+  const img = state.steps[stepId].images[idx];
+  document.getElementById('lightbox-img').src = img;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+// ============================================================================
+// Export / Import / Reset
+// ============================================================================
+function exportJSON() {
+  // Validación blanda: avisar si nombre o email vacíos
+  if (!state.meta.tester_name && !state.meta.tester_email) {
+    if (!confirm('No completaste tu nombre ni tu correo arriba. ¿Querés descargar el reporte igual?')) return;
+  }
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const tsRaw = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const nameSlug = (state.meta.tester_name || 'anonimo').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'anonimo';
+  a.href = url;
+  a.download = `bois-prueba-marca-${nameSlug}-${tsRaw}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Reporte descargado a tu carpeta de Descargas');
+}
+
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const parsed = JSON.parse(r.result);
+      if (!parsed.steps || !parsed.meta) throw new Error('Archivo inválido');
+      if (!confirm('Vas a reemplazar lo que tenés acá ahora por el reporte que cargaste. ¿Seguro?')) return;
+      state = parsed;
+      const empty = emptyState();
+      for (const id of Object.keys(empty.steps)) {
+        if (!state.steps[id]) state.steps[id] = empty.steps[id];
+      }
+      saveState();
+      renderAll();
+      toast('Reporte cargado correctamente');
+    } catch (e) {
+      toast('Error: el archivo no es válido. ' + e.message, 'err');
+    }
+  };
+  r.readAsText(file);
+  input.value = '';
+}
+
+function resetAll() {
+  if (!confirm('Vas a borrar TODO tu progreso (capturas, notas, etc). ¿Seguro?')) return;
+  state = emptyState();
+  saveState();
+  renderAll();
+  toast('Empezando de nuevo');
+}
+
+// ============================================================================
+// Utils
+// ============================================================================
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+let toastTimer = null;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = (type === 'err') ? 'var(--fail)' : 'var(--ok)';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ============================================================================
+// Boot
+// ============================================================================
+renderAll();
+
+// Pre-fill fecha si está vacía
+if (!state.meta.tester_date) {
+  const today = new Date().toISOString().slice(0, 10);
+  state.meta.tester_date = today;
+  document.getElementById('tester-date').value = today;
+  saveState();
+}
+</script>
+</body>
+</html>
