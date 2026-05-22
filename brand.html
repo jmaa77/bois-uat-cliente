@@ -904,6 +904,32 @@ const STEPS = [
     doStr: 'Salí de tu cuenta (clickeá "Cerrar sesión" o abrí el sitio en una ventana de incógnito). Buscá tu marca en el catálogo principal — escribí el nombre de tu marca en la barra de búsqueda y clickeala. O entrá directo a "/brand/" + tu ID.',
     seeStr: 'Se ve la página pública de tu marca: tu nombre, descripción, ubicación, y todas las prendas que subiste. Si tenés magazine, también se ve. Verificá que la información esté correcta y que las prendas y fotos se vean bien.',
   },
+
+  // ----- BLOCK F: IMPORTADOR AUTOMÁTICO (SCRAPER) -----
+  { id: 17, block: 'Importador automático (Scraper)', n: 17,
+    criticality: 'high',
+    title: 'Validar que tu plan permite o bloquea el importador',
+    doStr: 'Andá al panel de prendas y buscá el botón o sección "Importar desde URL" (también puede llamarse "Importador" o "Cargar desde sitio externo"). Si tu plan es Plus o Premium, debería estar disponible. Si tu plan es Free o no tenés suscripción, debería estar bloqueado o no aparecer.',
+    seeStr: 'Si tenés plan activo (Plus o Premium): el botón aparece y al clickearlo te lleva al formulario del importador. Si NO tenés plan activo: el botón no aparece, o aparece deshabilitado, o al clickearlo te dice "necesitás un plan para usar esta función" con un link a /pricing.',
+  },
+  { id: 18, block: 'Importador automático (Scraper)', n: 18,
+    criticality: 'medium',
+    title: 'Importador modo Guiado (recomendado para empezar)',
+    doStr: 'Dentro del importador, elegí la opción "Guiada" o "Asistente". Pegá la URL del catálogo de un sitio público (puede ser tu propia tienda o cualquier sitio con prendas). El sistema va a leer la página y mostrarte una previsualización de las prendas detectadas. Confirmá y aplicá.',
+    seeStr: 'Aparece una previsualización con las prendas detectadas (nombre, precio, foto). Después de confirmar, las prendas se agregan a tu catálogo. Si tu plan tiene límite (Plus = 20), el importador respeta ese tope — si traés más, te avisa que se importaron solo X de N y por qué.',
+  },
+  { id: 19, block: 'Importador automático (Scraper)', n: 19,
+    criticality: 'low',
+    title: 'Importador modo Plantilla — usar una plantilla existente (opcional)',
+    doStr: 'Si en el importador hay una opción "Plantilla" o "Templates", probala. Es para sitios que el equipo BOIS ya configuró previamente — vos solo elegís la plantilla y pegás la URL, sin tener que configurar nada.',
+    seeStr: 'Se ve un dropdown con plantillas disponibles. Al elegir una y poner la URL, el importador usa la configuración pre-armada sin que tengas que tocar nada técnico. Si no hay plantillas para tu sitio, marcá "No lo probé" — esta opción depende del trabajo previo del equipo.',
+  },
+  { id: 20, block: 'Importador automático (Scraper)', n: 20,
+    criticality: 'low',
+    title: 'Importador modo Avanzado — configuración custom (opcional, técnico)',
+    doStr: 'Si en el importador hay una opción "Avanzada", "Custom" o "Manual config", podés probarla SOLO si te sentís cómoda/o con conceptos técnicos: seleccionar elementos HTML por clase/ID, definir mapeo de campos, etc. Si no, marcá "No lo probé".',
+    seeStr: 'Aparecen campos donde definís selectores CSS, mapeo de fields (name, price, image), etc. Es para sitios complejos donde la opción Guiada no detecta bien. Esta opción es para usuarios avanzados o cuando los modos anteriores fallan.',
+  },
 ];
 
 // ============================================================================

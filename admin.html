@@ -1086,6 +1086,32 @@ const STEPS = [
     doStr: 'En System Settings vas a ver MÁS configuraciones que las de AdSense que ya probamos (anonymous_search_limit, user_free_search_limit, user_free_favorite_limit, user_free_ads_after_clicks, user_free_catalog_cap, user_free_search_filter_limit). Recorré la lista, identificá cuáles entendés y cuáles no. Si tenés ganas, probá editar UNA cualquiera (por ejemplo cambiá el limit de búsquedas anónimas de 5 a 3) y guardá. Después devolvelo a su valor original.',
     seeStr: 'Cada configuración tiene su descripción que explica para qué sirve. Después de guardar un cambio, el comportamiento de la app debería reflejarlo en la siguiente acción del usuario afectado (ej. el límite anónimo se aplica al próximo visitante sin cuenta). Si alguna configuración te resulta confusa o falta su descripción, anotalo. Si no llegás a probar esta parte, marcala como "No lo probé" — es opcional.',
   },
+
+  // ----- BLOQUE 10: PAGOS REALES END-TO-END (validación crítica con MP en vivo) -----
+  { id: 34, block: '10. Pagos reales end-to-end (MercadoPago)', n: 34,
+    criticality: 'high',
+    title: 'Crear 3 planes de prueba con valores BAJOS en MercadoPago + asociarlos',
+    doStr: 'IMPORTANTE: para validar el flujo completo de cobro en vivo necesitamos planes con valores reales pero CHICOS (sugerencia: ARS 500, ARS 1000, ARS 1500). En tu panel de MercadoPago creá esos 3 planes (los podés llamar "Prueba Plus", "Prueba Premium", "Prueba User Plus"). Después en BOIS andá a Planes → "+ Nuevo plan" → asociá cada uno con su plan de MP via el combo (NO uses los planes productivos reales todavía).',
+    seeStr: 'Los 3 planes nuevos aparecen en la tabla de Planes con su MP Plan ID real (NO debe empezar con "dev-mock-"). Al editar cada uno, el combo MP los lista correctamente y el precio + moneda se autocompletan disabled. Recordá: estos son planes de PRUEBA — los podés borrar de MP después de las pruebas.',
+  },
+  { id: 35, block: '10. Pagos reales end-to-end (MercadoPago)', n: 35,
+    criticality: 'high',
+    title: 'Suscribirse como BRAND con tarjeta REAL (cargo real $500-$1500)',
+    doStr: 'Salí de tu cuenta de SuperAdmin. Creá una cuenta NUEVA tipo BRAND (registro normal). Una vez con tu marca creada, andá a /pricing → elegí el plan más barato (Prueba Plus ARS 500) → clickeá "Suscribirme". Se abre MercadoPago en una pestaña nueva. Completá con UNA TARJETA REAL tuya (se va a cobrar ARS 500 de verdad — por eso elegimos un valor bajo). Confirmá el pago.',
+    seeStr: 'Después del pago exitoso, MP redirige de vuelta al perfil. La marca ahora muestra "Plan Plus activo" en el dashboard con la fecha de vencimiento. Si vas a la cuenta SuperAdmin → tab Brands, esta marca aparece con plan asociado. Si vas a Payments → debería aparecer el registro del cobro. Verificá tu cuenta MP/tarjeta — el cobro debe estar registrado.',
+  },
+  { id: 36, block: '10. Pagos reales end-to-end (MercadoPago)', n: 36,
+    criticality: 'high',
+    title: 'Hacer upgrade de plan en esa BRAND (de Plus → Premium)',
+    doStr: 'Con la cuenta de BRAND recién creada (todavía logueada), andá al panel y buscá "Cambiar plan" o "Mejorar plan". Elegí el plan "Prueba Premium" (ARS 1500). Confirmá. Se abre MP otra vez para autorizar el nuevo cobro (ARS 1500 - ARS 500 proporcional, o cobro full según el modelo del cliente).',
+    seeStr: 'El plan activo de la marca pasa a Premium. La fecha de vencimiento se actualiza al cobro nuevo. El cobro anterior queda como histórico. Si el sistema cancela automáticamente el plan anterior y cobra el nuevo, lo importante es que NO quede una doble facturación activa simultánea. Verificá en MP que solo hay 1 suscripción active asociada a tu mail.',
+  },
+  { id: 37, block: '10. Pagos reales end-to-end (MercadoPago)', n: 37,
+    criticality: 'high',
+    title: 'Cancelar la suscripción de esa BRAND',
+    doStr: 'Con la misma cuenta BRAND, andá al perfil → "Cancelar suscripción". Confirmá el cartel que te explica el grace period (la marca conserva acceso hasta la fecha de vencimiento del último cobro).',
+    seeStr: 'El plan de la marca queda con estado "Cancelado pero activo hasta {fecha}". Mientras estés en ese período, todavía podés subir prendas. Después de la fecha, la marca pasa a estado Free (sin acceso de publicación, prendas se borran automáticamente — esto último lo va a hacer el cron, no lo verás inmediato). En tu cuenta MercadoPago, la suscripción debe figurar como cancelada — no debería haber cobros futuros automáticos.',
+  },
 ];
 
 // ============================================================================

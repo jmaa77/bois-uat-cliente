@@ -171,6 +171,20 @@
   .step-status-chip.skip { background: var(--skip-bg); color: var(--skip); }
   .step-status-chip.pending { background: #f5f5f5; color: var(--pending); }
 
+  .step-criticality {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .step-criticality.crit-high { background: #ffebee; color: var(--fail); border: 1px solid var(--fail); }
+  .step-criticality.crit-medium { background: #fff8e1; color: #a8730a; border: 1px solid var(--accent); }
+  .step-criticality.crit-low { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok); }
+
   .step-body { padding-left: 38px; }
   .what-to-do, .what-to-see {
     margin: 10px 0;
@@ -222,6 +236,18 @@
   .status-btn.active.ok { background: var(--ok); color: white; border-color: var(--ok); }
   .status-btn.active.fail { background: var(--fail); color: white; border-color: var(--fail); }
   .status-btn.active.skip { background: var(--skip); color: white; border-color: var(--skip); }
+  .status-btn:disabled,
+  .status-btn.disabled-skip {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f5f5f5;
+    color: #999;
+    border-color: #ddd;
+  }
+  .status-btn:disabled:hover,
+  .status-btn.disabled-skip:hover {
+    background: #f5f5f5;
+  }
 
   /* Notas + evidencia */
   textarea.notes {
@@ -415,6 +441,18 @@
     <strong>⏱ Tiempo estimado:</strong> 30 a 45 minutos. Podés tomarte pausas — el archivo guarda automáticamente tu progreso.<br>
     <strong>💻 Necesitás:</strong> Una computadora con un navegador moderno (Chrome, Firefox, Edge o Safari) y acceso a internet.<br>
     <strong>📧 Vas a usar:</strong> Tu correo electrónico (real) para crear una cuenta. Te llegará un mensaje de verificación.
+  </div>
+
+  <div class="info-box" style="border-left-color: #c62828; background: #fff5f5;">
+    <strong>🎯 Sobre la criticidad de cada prueba</strong><br>
+    Cada paso tiene un nivel de importancia visible arriba a la derecha del título:
+    <ul style="margin: 8px 0 4px 20px; padding: 0;">
+      <li><span class="step-criticality crit-high">🔴 Alta</span> Si esta prueba falla, NO podemos lanzar el sitio — son las cosas que tienen que funcionar sí o sí (crear cuenta, login, buscar, marcar favoritos, ver planes, sistemas de aviso).</li>
+      <li><span class="step-criticality crit-medium">🟡 Media</span> Si falla, podemos lanzar pero hay que arreglarlo pronto (filtros, ver tu uso, publicidad).</li>
+      <li><span class="step-criticality crit-low">🟢 Baja</span> Si falla, lo podemos arreglar después del lanzamiento (cookies, cambiar idioma).</li>
+    </ul>
+    <strong>Importante:</strong> si encontrás un problema en una prueba de criticidad <strong>Alta</strong>, por favor reportalo apenas la termines — sin esperar a terminar toda la guía.<br>
+    <strong>Las pruebas de criticidad Alta NO se pueden marcar como "No lo probé"</strong> — son obligatorias. Si tenés un problema marcala como "Algo salió mal" y contanos qué pasó.
   </div>
 
   <h3>Tus datos (para el reporte)</h3>
@@ -701,6 +739,7 @@ const MOCKUPS = {
 const STEPS = [
   // ----- BLOCK A: COMENZAR -----
   { id: 1, block: 'Comenzar a usar la app', n: 1,
+    criticality: 'medium',
     title: 'Entrar al sitio',
     doStr: 'Abrí la dirección que te pasamos en una pestaña nueva del navegador. Esperá que cargue la página principal.',
     seeStr: 'Deberías ver el sitio con el logo "BOIS BOURGEOIS" arriba, una barra para buscar prendas, y abajo algunas prendas sugeridas (fotos con precios).',
@@ -708,6 +747,7 @@ const STEPS = [
     mockupCaption: 'Así se ve la parte de arriba del sitio',
   },
   { id: 2, block: 'Comenzar a usar la app', n: 2,
+    criticality: 'low',
     title: 'Aceptar la política de cookies',
     doStr: 'Al entrar por primera vez aparece un cartelito chico abajo o en el medio de la pantalla que pregunta por las cookies. Clickeá "Aceptar".',
     seeStr: 'El cartel desaparece y podés seguir navegando.',
@@ -715,6 +755,7 @@ const STEPS = [
     mockupCaption: 'El cartel se ve aproximadamente así',
   },
   { id: 3, block: 'Comenzar a usar la app', n: 3,
+    criticality: 'high',
     title: 'Crear tu cuenta',
     doStr: 'Buscá un botón o link que diga "Ingresar" o "Crear cuenta" (suele estar arriba a la derecha). Clickealo y elegí "Crear cuenta" o "Registrarse". Completá el formulario con tu correo real, una contraseña, etc. Confirmá.',
     seeStr: 'Vas a ver un mensaje que dice algo así como "Te enviamos un correo de verificación". Revisá tu casilla de mail (puede caer en spam).',
@@ -722,11 +763,13 @@ const STEPS = [
     mockupCaption: 'El formulario de creación de cuenta',
   },
   { id: 4, block: 'Comenzar a usar la app', n: 4,
+    criticality: 'high',
     title: 'Verificar tu correo',
     doStr: 'Abrí el correo que te llegó de Bois Bourgeois y clickeá el botón o link "Verificar correo". Esto activa tu cuenta.',
     seeStr: 'El link te lleva a una página que dice "Email verified successfully" o algo parecido. Si dice "invalid or expired", el link expiró y tenés que pedir uno nuevo.',
   },
   { id: 5, block: 'Comenzar a usar la app', n: 5,
+    criticality: 'high',
     title: 'Iniciar sesión',
     doStr: 'Volvé al sitio principal. Buscá "Ingresar" o "Login" arriba a la derecha. Ingresá tu correo y contraseña.',
     seeStr: 'Tu nombre o usuario debería aparecer arriba a la derecha (en vez del botón "Ingresar"). Esto significa que estás logueado.',
@@ -734,6 +777,7 @@ const STEPS = [
 
   // ----- BLOCK B: EXPLORAR -----
   { id: 6, block: 'Explorar el catálogo', n: 6,
+    criticality: 'high',
     title: 'Buscar una prenda',
     doStr: 'Tipeá una palabra en la barra de búsqueda de arriba (por ejemplo: "jean", "remera", "camisa"). Apretá Enter o el botón de la lupa.',
     seeStr: 'Aparecen prendas que coinciden con lo que buscaste. Cada prenda muestra una foto, el nombre, la marca y el precio.',
@@ -741,6 +785,7 @@ const STEPS = [
     mockupCaption: 'Cada prenda se ve aproximadamente así',
   },
   { id: 7, block: 'Explorar el catálogo', n: 7,
+    criticality: 'medium',
     title: 'Usar los filtros',
     doStr: 'En la página de búsqueda, fijate si hay opciones de filtro (talle, color, temperatura, precio, categoría). Cambiá al menos uno o dos.',
     seeStr: 'Los resultados se actualizan automáticamente según el filtro que cambiaste.',
@@ -748,6 +793,7 @@ const STEPS = [
 
   // ----- BLOCK C: INTERACTUAR -----
   { id: 8, block: 'Marcar prendas que te gusten', n: 8,
+    criticality: 'high',
     title: 'Marcar una prenda como favorita',
     doStr: 'Pasá el cursor encima de una prenda. Vas a ver un ícono de corazón. Clickealo.',
     seeStr: 'El corazón cambia de color (se llena de rojo, o lo que sea), indicando que la prenda quedó guardada en tus favoritos.',
@@ -755,11 +801,13 @@ const STEPS = [
     mockupCaption: 'El corazón rojo (izquierda) significa marcada favorita',
   },
   { id: 9, block: 'Marcar prendas que te gusten', n: 9,
+    criticality: 'medium',
     title: 'Ver tus favoritos',
     doStr: 'Buscá un menú "Mi cuenta" o "Perfil" (arriba a la derecha donde aparece tu nombre). Entrá ahí y buscá la sección "Favoritos".',
     seeStr: 'La prenda que marcaste debería aparecer en la lista.',
   },
   { id: 10, block: 'Marcar prendas que te gusten', n: 10,
+    criticality: 'high',
     title: 'Ir al sitio de la marca para comprar',
     doStr: 'Volvé a una prenda. Buscá un botón o link que diga "Ver en la marca" o que tenga un ícono de "abrir afuera" (↗). Clickealo.',
     seeStr: 'Se abre en otra pestaña el sitio web de la marca donde podrías comprar esa prenda.',
@@ -767,6 +815,7 @@ const STEPS = [
 
   // ----- BLOCK D: AVISOS DEL SISTEMA -----
   { id: 11, block: 'Avisos del sistema (limites)', n: 11,
+    criticality: 'high',
     title: 'Probar el aviso "cerca del límite"',
     doStr: 'Hacé click en "Ver en la marca" varias veces (en distintas prendas). Después de unos cuantos clicks (entre 6 y 8 aprox), debería aparecerte un cartel naranja/amarillo.',
     seeStr: 'El cartel dice algo como "Estás cerca del límite" con un botón "Suscribirme a Plus". Es un aviso amistoso, no te bloquea todavía.',
@@ -774,6 +823,7 @@ const STEPS = [
     mockupCaption: 'Así se ve el aviso de "cerca del límite"',
   },
   { id: 12, block: 'Avisos del sistema (limites)', n: 12,
+    criticality: 'high',
     title: 'Probar el aviso "límite alcanzado"',
     doStr: 'Seguí haciendo click en "Ver en la marca" hasta llegar a 10 visualizaciones en total. En la próxima debería aparecer una ventana con borde rojo.',
     seeStr: 'La ventana dice "Alcanzaste el límite" con un botón "Suscribirme a Plus". Esta vez sí te bloquea la próxima visualización hasta que te suscribas o pase tiempo.',
@@ -781,6 +831,7 @@ const STEPS = [
     mockupCaption: 'Así se ve la ventana de "límite alcanzado"',
   },
   { id: 13, block: 'Avisos del sistema (limites)', n: 13,
+    criticality: 'medium',
     title: 'Ver tu barra de uso en tu perfil',
     doStr: 'Andá a tu perfil (arriba a la derecha) y buscá la sección "Suscripción". Mirá la barra que muestra cuánto usaste de tu plan.',
     seeStr: 'La barra debería estar roja (si llegaste al 100%) o amarilla (si estás cerca del límite). Verde si todavía no llegaste al 60%.',
@@ -790,6 +841,7 @@ const STEPS = [
 
   // ----- BLOCK E: PLANES -----
   { id: 14, block: 'Ver planes y suscripción', n: 14,
+    criticality: 'high',
     title: 'Ver la página de planes',
     doStr: 'Clickeá en "Planes" en el menú de arriba. Si no aparece, intentá ir a la dirección + "/pricing" (por ejemplo: tudominio.com/pricing).',
     seeStr: 'Aparecen los planes disponibles. Si entrás logueado como usuario, vas a ver el plan "Plus" ($9.000/mes). Si entrás sin cuenta o navegás como anónimo, vas a ver dos pestañas: "Usuario" y "Marca".',
@@ -797,6 +849,7 @@ const STEPS = [
     mockupCaption: 'La página de planes con las dos pestañas',
   },
   { id: 15, block: 'Ver planes y suscripción', n: 15,
+    criticality: 'high',
     title: 'Probar de suscribirte (opcional, no es necesario completar el pago)',
     doStr: 'Clickeá el botón "Suscribirme" o "Suscribirme a Plus". Se abre una nueva pestaña con un formulario de Mercado Pago para ingresar tarjeta. NO completes el pago, solo verificá que se abre el formulario.',
     seeStr: 'Se abre una pestaña nueva con el logo de Mercado Pago y un formulario para datos de tarjeta. Eso indica que la integración con Mercado Pago funciona. Podés cerrar la pestaña sin pagar.',
@@ -804,6 +857,7 @@ const STEPS = [
 
   // ----- BLOCK F: EXTRA -----
   { id: 16, block: 'Cosas extra', n: 16,
+    criticality: 'medium',
     title: 'Probar la "publicidad" antes de ir a la marca (si te tocó)',
     doStr: 'Durante las pruebas de visualizaciones (paso 11-12), después de unos clicks puede aparecer una ventana con la palabra "Patrocinado" antes de ir al sitio de la marca. Si te apareció, contanos cómo te resultó.',
     seeStr: 'Una ventana centrada con un cartel "Patrocinado" + un botón "Continuar" que abre el sitio de la marca, o "Suscribirme" para evitar las publicidades.',
@@ -811,6 +865,7 @@ const STEPS = [
     mockupCaption: 'La ventana "Patrocinado" debería verse así (o muy parecido)',
   },
   { id: 17, block: 'Cosas extra', n: 17,
+    criticality: 'low',
     title: 'Navegar en otro idioma (opcional)',
     doStr: 'Buscá un selector de idioma (suele estar en el footer o en el menú). Cambialo a Inglés o Francés. Mirá si los textos cambian de idioma correctamente.',
     seeStr: 'Los textos visibles (menús, botones, mensajes) cambian al idioma seleccionado. Si ves algunos textos que NO se traducen, anotanos cuáles.',
@@ -901,6 +956,7 @@ function renderStep(step) {
     <div class="step-head">
       <span class="step-number">${escapeHtml(String(step.n))}</span>
       <span class="step-title">${escapeHtml(step.title)}</span>
+      <span class="step-criticality crit-${step.criticality || 'medium'}" title="Criticidad de la prueba">${critLabel(step.criticality)}</span>
       <span class="step-status-chip ${s.status}">${statusLabel(s.status)}</span>
     </div>
     <div class="step-body">
@@ -916,7 +972,10 @@ function renderStep(step) {
       <div class="status-row">
         <button class="status-btn ${s.status === 'ok' ? 'active ok' : ''}" onclick="setStatus(${step.id}, 'ok')">✓ Funcionó</button>
         <button class="status-btn ${s.status === 'fail' ? 'active fail' : ''}" onclick="setStatus(${step.id}, 'fail')">✗ Algo salió mal</button>
-        <button class="status-btn ${s.status === 'skip' ? 'active skip' : ''}" onclick="setStatus(${step.id}, 'skip')">— No lo probé</button>
+        <button
+          class="status-btn ${s.status === 'skip' ? 'active skip' : ''}${step.criticality === 'high' ? ' disabled-skip' : ''}"
+          ${step.criticality === 'high' ? 'disabled title="No se puede skipear: criticidad Alta — esta prueba debe completarse para validar el lanzamiento"' : ''}
+          onclick="setStatus(${step.id}, 'skip')">— No lo probé</button>
       </div>
       <textarea class="notes"
         placeholder="¿Algo para contarnos? Si algo salió mal, contanos qué pasó (qué hiciste, qué esperabas, qué viste). Si todo OK, podés dejarlo vacío."
@@ -975,10 +1034,27 @@ function statusLabel(st) {
 // Mutations
 // ============================================================================
 function setStatus(stepId, status) {
+  // Guard criticidad Alta: el botón "skip" está disabled, pero por si alguien
+  // manipula DOM o quedó un estado viejo cargado del localStorage, rechazamos.
+  if (status === 'skip') {
+    const step = STEPS.find(s => s.id === stepId);
+    if (step && step.criticality === 'high') {
+      toast('Esta prueba es de criticidad Alta — no se puede skipear. Marcala como "Funcionó" o "Algo salió mal".', 'err');
+      return;
+    }
+  }
   state.steps[stepId].status = status;
   saveState();
   rerenderStepCard(stepId);
   updateSummary();
+}
+
+function critLabel(c) {
+  return {
+    high: '🔴 Alta',
+    medium: '🟡 Media',
+    low: '🟢 Baja',
+  }[c || 'medium'];
 }
 
 function updateNotes(stepId, value) {
