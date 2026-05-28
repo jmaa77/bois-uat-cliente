@@ -116,6 +116,39 @@
   .progress-bar-wrap { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin-top: 10px; }
   .progress-bar-fill { height: 100%; background: var(--primary); transition: width .3s; }
 
+  /* Tab bar (administración vs E2E) */
+  .tab-bar {
+    display: flex;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bg);
+    padding: 12px 0;
+    margin-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    flex: 1;
+    min-width: 240px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: left;
+    transition: all .15s;
+    box-shadow: var(--shadow);
+    color: var(--text);
+  }
+  .tab-btn:hover { border-color: var(--primary); }
+  .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .tab-btn .tab-sub { display: block; font-size: 12px; font-weight: 500; opacity: .85; margin-top: 3px; }
+
   /* Bloques + pasos */
   .block { margin: 24px 0 8px; }
   .block-title {
@@ -438,10 +471,19 @@
   <p><strong>Esta guía es larga.</strong> Tiene muchas pruebas porque vas a tener muchas herramientas para usar. Podés hacerla en varias sesiones — el archivo guarda tu progreso automáticamente. Tu opinión sincera nos ayuda a encontrar problemas antes de que los vea cualquier otra persona.</p>
 
   <div class="info-box">
-    <strong>⏱ Tiempo estimado:</strong> 1 hora 30 minutos a 2 horas. Recomendamos hacerlo en varias sesiones — podés pausar y volver, el progreso se guarda solo.<br>
+    <strong>⏱ Tiempo estimado:</strong> 2 horas 30 minutos a 3 horas (incluye el flujo de pagos real). Recomendamos hacerlo en varias sesiones — podés pausar y volver, el progreso se guarda solo.<br>
     <strong>💻 Necesitás:</strong> Una computadora con un navegador moderno (Chrome, Firefox, Edge o Safari) y acceso a internet.<br>
     <strong>🔑 Vas a usar:</strong> El correo y contraseña de la cuenta de SuperAdmin que te pasamos. <em>Esta cuenta tiene acceso completo</em> — no la compartas.<br>
-    <strong>💳 Vas a necesitar:</strong> Tener tus 3 planes ya creados en tu panel de MercadoPago (te pedimos eso aparte). La guía asume que ya están ahí.
+    <strong>💳 Tarjeta real:</strong> El segundo tab valida el cobro de punta a punta. Vas a crear 3 planes "baratos" en tu MercadoPago (ARS 500, 1.000 y 1.500) y suscribir 3 marcas de prueba con una tarjeta real — <em>son cobros reales por ~ARS 3.000 en total</em>. Lo hacemos con valores chicos a propósito; los planes de prueba se borran al final.
+  </div>
+
+  <div class="info-box" style="border-left-color: #0a3d62; background: #eef4fa;">
+    <strong>🗂 Esta guía tiene 2 tabs (arriba de los pasos):</strong>
+    <ul style="margin: 8px 0 4px 20px; padding: 0;">
+      <li><strong>🛠 Herramientas de administración:</strong> todo lo que el SuperAdmin maneja a diario (tableros, planes, niveles, prestigio, marcas, usuarios, configuración, publicidad).</li>
+      <li><strong>💳 Flujo E2E: Suscripciones de Marca:</strong> el flujo más importante del negocio, paso a paso — crear planes en MercadoPago, asociarlos, crear marcas, suscribir con tarjeta real, hacer upgrade y cancelar.</li>
+    </ul>
+    Hacé un tab y después el otro. El progreso de los dos se guarda junto y se descarga en un solo reporte.
   </div>
 
   <div class="info-box" style="border-left-color: #c62828; background: #fff5f5;">
@@ -522,6 +564,9 @@
   </div>
 </section>
 
+<!-- ============ TAB BAR ============ -->
+<div class="tab-bar" id="tab-bar"></div>
+
 <!-- ============ STEPS CONTAINER ============ -->
 <div id="steps-container"></div>
 
@@ -601,7 +646,7 @@ const MOCKUPS = {
       <rect x="0" y="0" width="360" height="180" fill="#fafafa"/>
       <text x="20" y="22" font-family="sans-serif" font-size="13" fill="#0a3d62" font-weight="700">Planes</text>
       <rect x="260" y="10" width="80" height="20" rx="3" fill="#0a3d62"/>
-      <text x="300" y="23" font-family="sans-serif" font-size="9" fill="#fff" text-anchor="middle" font-weight="600">+ Nuevo plan</text>
+      <text x="300" y="23" font-family="sans-serif" font-size="9" fill="#fff" text-anchor="middle" font-weight="600">+ Agregar plan</text>
       <rect x="20" y="40" width="320" height="20" fill="#f0f0f0"/>
       <text x="30" y="54" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Tier</text>
       <text x="110" y="54" font-family="sans-serif" font-size="9" fill="#666" font-weight="700">Nombre</text>
@@ -851,266 +896,369 @@ const MOCKUPS = {
 // PASOS DE LA PRUEBA
 // ============================================================================
 const STEPS = [
-  // ----- BLOQUE 1: ENTRAR Y PANEL -----
+  // ----- BLOQUE 1: ENTRAR Y VER TU PANEL -----
   { id: 1, block: '1. Entrar y ver tu panel', n: 1,
     criticality: 'high',
     title: 'Iniciar sesión con tu cuenta de administrador',
-    doStr: 'Abrí la dirección que te pasamos en una pestaña nueva. Buscá "Ingresar" arriba a la derecha. Completá con el correo/usuario y contraseña de tu cuenta de SuperAdmin. Si te pide verificación de seguridad, completala.',
-    seeStr: 'Te lleva al sitio principal y arriba a la derecha aparece tu nombre. Si entrás a "Panel" o "Mi cuenta" → "Dashboard", deberías ver MUCHAS más opciones que las que ve un usuario normal (cuadritos de números, pestañas con muchas opciones).',
+    doStr: 'Abrí la dirección que te pasamos en una pestaña nueva. Buscá "Ingresar" arriba a la derecha. Completá con el correo/usuario y contraseña de tu cuenta de SuperAdmin. Si te pide verificación de seguridad, completala. Una vez adentro, entrá al panel de administración.',
+    seeStr: 'Entrás al sitio y arriba a la derecha aparece tu nombre. En el panel de administración, sobre el lado IZQUIERDO, vas a ver un menú con varias secciones: "Dashboard", "Revista", "Prendas", "Categorías", "Marcas", "Usuarios y Marcas", "Novedades" e "Importador". Un usuario normal casi no ve ninguna de estas. La primera, "Dashboard", es la que más vas a usar.',
     mockup: 'loginForm',
     mockupCaption: 'El formulario de inicio de sesión',
   },
   { id: 2, block: '1. Entrar y ver tu panel', n: 2,
     criticality: 'medium',
-    title: 'Ver los 4 indicadores del mes (KPIs)',
-    doStr: 'En el panel principal (Dashboard), arriba de todo, vas a ver 4 cuadritos con números: cantidad de pagos del mes, ingresos del mes, suscripciones activas, y nuevos usuarios del mes.',
-    seeStr: 'Los 4 cuadritos muestran números reales. Si recién arranca prod, pueden estar en cero — eso está bien. Lo importante es que se vean los 4 cuadritos sin errores ni texto roto.',
+    title: 'Ver los indicadores del periodo (KPIs)',
+    doStr: 'En el menú de la izquierda, entrá a "Dashboard". Por defecto se abre la pestaña "Stats" (estadísticas). Mirá los cuadritos con números que aparecen arriba.',
+    seeStr: 'Vas a ver varios cuadritos repartidos en filas: "Pagos del Periodo", "Ingresos del Periodo", "Suscripciones Activas", "Nuevos Usuarios del Periodo", y más abajo "Interacciones del Periodo", "Visitas Registrados", "Visitas No Registrados" y "Prendas del Periodo". Si prod recién arranca pueden estar en cero — eso está bien. Lo importante es que se vean todos sin errores ni texto roto.',
     mockup: 'adminKpis',
-    mockupCaption: 'Los 4 cuadritos que ves al entrar',
+    mockupCaption: 'Algunos de los cuadritos que ves al entrar a Stats',
+  },
+  { id: 3, block: '1. Entrar y ver tu panel', n: 3,
+    criticality: 'low',
+    title: 'Filtrar las estadísticas por fecha y ver el gráfico diario',
+    doStr: 'En la misma pestaña "Stats", arriba de los cuadritos hay un selector de rango de fechas (con un "Desde" y un "Hasta"). Clickealo: tiene atajos rápidos como "Este mes", "Mes pasado", "Últimos 7 días" y "Últimos 30 días". Elegí uno de los atajos.',
+    seeStr: 'Los números de los cuadritos se recalculan para el rango que elegiste. Más abajo deberías ver un gráfico de líneas titulado "Evolución Diaria" que muestra cómo evolucionan los datos día a día dentro del rango. No deberías poder elegir fechas futuras (quedan deshabilitadas).',
   },
 
   // ----- BLOQUE 2: PLANES Y MERCADOPAGO -----
-  { id: 3, block: '2. Planes y MercadoPago (importante)', n: 3,
-    criticality: 'medium',
-    title: 'Ver la lista de planes',
-    doStr: 'En el panel, andá a la pestaña "Niveles y Planes" (o "Planes"). Vas a ver una tabla con los planes existentes: Plan Plus marca, Plan Premium marca, y Plus usuario.',
-    seeStr: 'Aparecen los 3 planes. Cada uno tiene su tier, nombre, precio en ARS, y el "MP Plan ID". Si el MP Plan ID empieza con "dev-mock-", significa que todavía no está asociado a un plan real de MercadoPago (es lo esperado antes de que asocies los tuyos).',
-    mockup: 'plansList',
-    mockupCaption: 'La tabla de planes',
-  },
   { id: 4, block: '2. Planes y MercadoPago (importante)', n: 4,
+    criticality: 'low',
+    title: 'Ver la lista de planes',
+    doStr: 'En "Dashboard", arriba hay pestañas: "Stats", "Site Configurations", "Tiers & Suscripciones", "Text Manager", "Email Template Manager" e "Image Manager". Entrá a "Tiers & Suscripciones". Adentro vas a ver pestañas por tipo de público: "Marca", "Usuarios" y "Usuarios no Registrados". En "Marca" elegí la sub-pestaña "Planes"; después mirá también "Usuarios" → "Planes".',
+    seeStr: 'En "Marca" → "Planes" aparecen los planes de las marcas (Plan Plus y Plan Premium). En "Usuarios" → "Planes" aparece el plan Plus de usuario. Cada plan muestra su nombre, nivel (tier), precio en ARS y el "MP Plan ID". Si el MP Plan ID empieza con "dev-mock-", todavía no está asociado a un plan real de MercadoPago (es lo esperado antes de que asocies los tuyos).',
+    mockup: 'plansList',
+    mockupCaption: 'La tabla de planes (dentro de Tiers & Suscripciones)',
+  },
+  { id: 5, block: '2. Planes y MercadoPago (importante)', n: 5,
     criticality: 'high',
     title: 'Asociar un plan con tu MercadoPago — Plan Plus marca',
-    doStr: 'En la tabla, encontrá la fila "brand-plus" (Plan Plus). Clickeá "Editar". En el formulario, buscá el combo "Plan de MercadoPago". Clickealo — debería listar los planes que vos creaste en tu panel de MercadoPago. Elegí el que corresponda al Plan Plus (ARS 69.000). El precio y la moneda se autocompletan solos.',
+    doStr: 'En "Tiers & Suscripciones" → "Marca" → "Planes", encontrá la fila del Plan Plus (brand-plus) y clickeá "Editar". En el formulario, buscá el combo "Plan de MercadoPago". Clickealo — debería listar los planes que vos creaste en tu panel de MercadoPago. Elegí el que corresponda al Plan Plus (ARS 69.000). El precio y la moneda se autocompletan solos.',
     seeStr: 'Después de elegir el plan de MP, los campos "Precio" y "Moneda" quedan grises (no editables) — eso confirma que se sincronizaron desde MercadoPago. Debajo del combo aparece un cartelito verde "MP: active" + un texto explicativo. Guardá.',
     mockup: 'planFormMpCombo',
     mockupCaption: 'Cómo se ve el formulario después de elegir el plan de MP',
   },
-  { id: 5, block: '2. Planes y MercadoPago (importante)', n: 5,
+  { id: 6, block: '2. Planes y MercadoPago (importante)', n: 6,
     criticality: 'high',
     title: 'Repetir para los otros 2 planes (Plan Premium marca + Plus usuario)',
-    doStr: 'Hacé lo mismo del paso anterior con las otras 2 filas: "brand-premium" (Plan Premium, ARS 169.000) y "user-plus" (Plus, ARS 9.000). Asociá cada uno con su plan real de MercadoPago.',
-    seeStr: 'Después de los 3, la tabla debería mostrar todos los planes con un MP Plan ID que NO empiece con "dev-mock-". Eso significa que ya están listos para que los usuarios y marcas puedan pagar de verdad.',
+    doStr: 'Hacé lo mismo del paso anterior con los otros 2: el Plan Premium (brand-premium, ARS 169.000), que está en "Marca" → "Planes"; y el Plus de usuario (user-plus, ARS 9.000), que está en "Usuarios" → "Planes". Asociá cada uno con su plan real de MercadoPago.',
+    seeStr: 'Después de los 3, ningún plan debería tener un MP Plan ID que empiece con "dev-mock-". Eso significa que ya están listos para que los usuarios y marcas puedan pagar de verdad.',
   },
-  { id: 6, block: '2. Planes y MercadoPago (importante)', n: 6,
+  { id: 7, block: '2. Planes y MercadoPago (importante)', n: 7,
     criticality: 'medium',
     title: 'Probar de eliminar un plan (con cuidado, opcional)',
-    doStr: 'Si querés probar el borrado: creá primero un plan de prueba (clickeá "+ Nuevo plan", completá los campos, guardá). Después en la lista, clickeá "Borrar" en ese plan de prueba. Confirmá si te pregunta.',
+    doStr: 'Si querés probar el borrado: en "Marca" → "Planes" clickeá "Agregar plan", completá los campos y guardá un plan de prueba. Después en la lista clickeá borrar en ese plan de prueba. Confirmá si te pregunta.',
     seeStr: 'El plan de prueba desaparece de la tabla. NO toques los 3 planes principales (brand-plus, brand-premium, user-plus) — si los borrás los usuarios no pueden suscribirse. Marcá "No lo probé" si no querés arriesgar.',
   },
 
   // ----- BLOQUE 3: NIVELES (TIERS) -----
-  { id: 7, block: '3. Niveles internos (Tiers)', n: 7,
+  { id: 8, block: '3. Niveles internos (Tiers)', n: 8,
     criticality: 'low',
-    title: 'Ver los niveles de las marcas (Tiers BRAND)',
-    doStr: 'En el panel, andá a "Niveles" o "Tier Settings". Elegí la pestaña "Brand". Vas a ver los niveles que pueden tener las marcas: brand-plus, brand-premium, y posiblemente alguno gratuito.',
+    title: 'Ver los niveles de las marcas (Tiers de Marca)',
+    doStr: 'En "Tiers & Suscripciones" → "Marca", elegí la sub-pestaña "Configuración de niveles". Vas a ver los niveles que pueden tener las marcas (por ejemplo Plus y Premium, y posiblemente uno gratuito).',
     seeStr: 'Cada nivel muestra su nombre y los límites: cuántas prendas puede subir, cuántas imágenes de revista, etc. Estos límites son los que respetan las marcas según el plan que tengan.',
   },
-  { id: 8, block: '3. Niveles internos (Tiers)', n: 8,
+  { id: 9, block: '3. Niveles internos (Tiers)', n: 9,
     criticality: 'high',
     title: 'Editar un nivel de marca (cambiar el límite de prendas)',
-    doStr: 'En la tabla, elegí "brand-plus" y clickeá "Editar". Cambiá el campo "Máximo de prendas" — por ejemplo, ponele 25 en vez de 20. Guardá.',
+    doStr: 'En "Configuración de niveles" (de Marca), elegí el nivel Plus y clickeá "Editar". Cambiá el campo "Máximo de prendas" — por ejemplo, ponele 25 en vez de 20. Guardá.',
     seeStr: 'El cambio se ve reflejado en la lista. Si vas al panel de cualquier marca con plan Plus, su barra de uso ahora debería decir "X / 25" en vez de "X / 20". ATENCIÓN: si querés volver al valor original, hacelo ahora.',
     mockup: 'tierEditForm',
     mockupCaption: 'El formulario de edición de nivel',
   },
-  { id: 9, block: '3. Niveles internos (Tiers)', n: 9,
+  { id: 10, block: '3. Niveles internos (Tiers)', n: 10,
     criticality: 'low',
-    title: 'Ver los niveles de los usuarios (Tiers USER)',
-    doStr: 'En la misma pantalla, cambiá a la pestaña "User". Vas a ver los niveles para usuarios B2C: user-free, user-plus.',
+    title: 'Ver los niveles de los usuarios (Tiers de Usuario)',
+    doStr: 'Volvé a "Tiers & Suscripciones" y cambiá la pestaña de público a "Usuarios". Ahí elegí la sub-pestaña "Configuración de niveles". Vas a ver los niveles para usuarios B2C: user-free y user-plus.',
     seeStr: 'Cada uno muestra sus 5 límites internos: cantidad de clicks, cantidad de favoritos, cantidad de búsquedas, cada cuántos clicks aparece publicidad, y máximo de prendas que puede ver en el catálogo. El "user-plus" tiene todos sin límite (o casi).',
   },
-  { id: 10, block: '3. Niveles internos (Tiers)', n: 10,
+  { id: 11, block: '3. Niveles internos (Tiers)', n: 11,
     criticality: 'high',
     title: 'Modificar un límite de usuario (cambiar cantidad de favoritos)',
-    doStr: 'En user-free, clickeá "Editar". Buscá el campo "favoritos" (favorite_limit) — debería estar en algún número como 20 o 50. Cambialo a un número más bajo, ej. 10. Guardá.',
+    doStr: 'En "Usuarios" → "Configuración de niveles", en el nivel user-free clickeá "Editar". Buscá el campo de favoritos (favorite_limit) — debería estar en algún número como 20 o 50. Cambialo a un número más bajo, ej. 10. Guardá.',
     seeStr: 'El cambio se aplica al instante. Si un usuario Free tiene exactamente la cantidad que pusiste, va a recibir el aviso de "límite alcanzado" la próxima vez que intente agregar uno más. Recordá volver al valor original si quisiste solo probar.',
   },
 
-  // ----- BLOQUE 4: MARCAS -----
-  { id: 11, block: '4. Manejo de marcas', n: 11,
+  // ----- BLOQUE 4: NIVELES DE PRESTIGIO (funcionalidad nueva) -----
+  { id: 12, block: '4. Niveles de Prestigio', n: 12,
+    criticality: 'low',
+    title: 'Ver los niveles de prestigio',
+    doStr: 'En "Dashboard" → "Site Configurations" (configuraciones del sitio) vas a ver sub-pestañas: "General Configurations", "Prestige Configurations" y "Test Configurations". Entrá a "Prestige Configurations". Ahí está el título "Niveles de Prestigio".',
+    seeStr: 'Aparece una tabla con los niveles de prestigio que se les asignan a las marcas. Cada fila muestra una "Vista previa" (la etiqueta de color como se vería sobre las prendas), el "Código", el "Nombre", la columna "Aprobación" (dice "Manual" o "Automática") y el "Orden". Estos niveles son el distintivo de prestigio que aparece en el catálogo.',
+  },
+  { id: 13, block: '4. Niveles de Prestigio', n: 13,
+    criticality: 'low',
+    title: 'Crear y editar un nivel de prestigio',
+    doStr: 'En "Prestige Configurations" clickeá "Agregar nivel". Completá: "Código" (ej. ELITE), "Nombre" (ej. Elite), elegí los 3 colores (texto, fondo, borde), un "Orden" y el switch "Requiere aprobación". Mirá la "Vista previa" mientras editás. Guardá. Después, en la tabla, clickeá el botón de editar (lápiz) de un nivel existente, cambiale el nombre o un color y guardá de nuevo.',
+    seeStr: 'El nivel nuevo aparece en la tabla con su etiqueta de color. Al editar, los cambios se reflejan en la lista. La "Vista previa" del formulario te muestra en vivo cómo va a quedar la etiqueta antes de guardar.',
+  },
+  { id: 14, block: '4. Niveles de Prestigio', n: 14,
+    criticality: 'low',
+    title: 'Borrar un nivel de prestigio de prueba',
+    doStr: 'En la tabla de "Niveles de Prestigio", encontrá el nivel de prueba que creaste y clickeá el botón rojo de eliminar (tacho de basura). Confirmá.',
+    seeStr: 'El nivel de prueba desaparece de la tabla. Importante: los niveles por defecto del sistema NO se pueden borrar — su botón de eliminar aparece deshabilitado (gris). Eso es a propósito, para no dejar al sitio sin niveles base.',
+  },
+
+  // ----- BLOQUE 5: MARCAS -----
+  { id: 15, block: '5. Manejo de marcas', n: 15,
     criticality: 'low',
     title: 'Ver la lista de marcas',
-    doStr: 'En el panel, andá a "Usuarios y Marcas" → pestaña "Marcas". Vas a ver una tabla con todas las marcas del sitio: nombre, dueño, plan actual, y cuánto están usando de su plan.',
-    seeStr: 'La tabla muestra todas las marcas. La columna "Uso del plan" tiene un color: verde si están bien, amarillo si están cerca del tope (60-80%), rojo si están casi al límite (>=80%).',
+    doStr: 'En el menú de la izquierda, entrá a "Usuarios y Marcas" y elegí la pestaña "Marcas". Vas a ver una tabla con todas las marcas del sitio.',
+    seeStr: 'La tabla muestra cada marca con su razón social, marca, propietario, nivel de prestigio, suscripción y la columna "Uso del plan". Ese uso tiene un color: verde si están bien, amarillo si están cerca del tope (60-80%), rojo si están casi al límite (>=80%). Si una marca tiene excepciones de límite, aparece una etiqueta indicándolo.',
     mockup: 'brandsTable',
     mockupCaption: 'La tabla de marcas con el filtro upsell',
   },
-  { id: 12, block: '4. Manejo de marcas', n: 12,
+  { id: 16, block: '5. Manejo de marcas', n: 16,
     criticality: 'low',
     title: 'Usar el filtro "Solo upsell candidates"',
-    doStr: 'En la misma pantalla, arriba de la tabla hay un switch que dice "Solo upsell candidates (>=80%)". Activalo.',
+    doStr: 'En la misma pestaña "Marcas", arriba de la tabla hay un switch que dice "Solo upsell candidates (>=80%)". Activalo.',
     seeStr: 'La tabla se filtra y solo se ven las marcas que están cerca o pasaron el límite del plan — son las que probablemente quieran mejorar a un plan más alto. Al lado del switch aparece el contador "X / Total".',
   },
-  { id: 13, block: '4. Manejo de marcas', n: 13,
+  { id: 17, block: '5. Manejo de marcas', n: 17,
     criticality: 'high',
     title: 'Borrar una marca (CON MUCHO CUIDADO)',
-    doStr: 'IMPORTANTE: Esto borra la marca completa con todas sus prendas. Solo hacelo con una marca de prueba que crearon a propósito (pedinos crear una "Marca Test" antes si querés probar). En la tabla, clickeá "Borrar" en la marca de prueba. Confirmá.',
+    doStr: 'IMPORTANTE: Esto borra la marca completa con todas sus prendas. Solo hacelo con una marca de prueba creada a propósito (pedinos crear una "Marca Test" antes si querés probar). En la pestaña "Marcas", clickeá borrar en la marca de prueba. Confirmá.',
     seeStr: 'La marca desaparece de la tabla y también del catálogo principal del sitio. Sus prendas también se borran. Esta acción NO tiene vuelta — por eso solo se usa con cuentas de prueba.',
   },
-  { id: 14, block: '4. Manejo de marcas', n: 14,
+  { id: 18, block: '5. Manejo de marcas', n: 18,
     criticality: 'high',
     title: 'Agregar una excepción de límite a una marca',
-    doStr: 'En el panel, andá a "Excepciones de límites" (o "Limits Overrides"). Clickeá "+ Agregar excepción". Elegí una marca de la lista, elegí qué tipo de límite querés cambiarle (ej. upload_limit), poné un valor más alto (ej. 50). Guardá.',
-    seeStr: 'La excepción aparece en la tabla. Esa marca ahora puede usar el límite nuevo sin importar su plan. Útil para casos especiales: marcas beta, clientes importantes, etc. La marca también muestra una etiqueta amarilla en la tabla de marcas indicando que tiene excepciones.',
+    doStr: 'Las excepciones de límite se manejan desde "Dashboard" → "Tiers & Suscripciones" → pestaña "Marca" → sub-pestaña "Excepciones de límites". Clickeá "Agregar override". Elegí una marca de la lista, elegí qué límite querés cambiarle (ej. el de subida de prendas), poné un valor más alto (ej. 50). Guardá.',
+    seeStr: 'La excepción aparece en la tabla "Excepciones de límites por marca". Esa marca ahora puede usar el límite nuevo sin importar su plan. Útil para casos especiales: marcas beta, clientes importantes, etc. En la tabla de Marcas (dentro de "Usuarios y Marcas") esa marca también muestra una etiqueta indicando que tiene excepciones.',
     mockup: 'limitsOverrides',
     mockupCaption: 'La pantalla de excepciones de límites',
   },
 
-  // ----- BLOQUE 5: USUARIOS B2C -----
-  { id: 15, block: '5. Manejo de usuarios B2C', n: 15,
+  // ----- BLOQUE 6: USUARIOS B2C -----
+  { id: 19, block: '6. Manejo de usuarios B2C', n: 19,
     criticality: 'low',
     title: 'Ver la lista de usuarios B2C',
-    doStr: 'En "Usuarios y Marcas", andá a la pestaña "Usuarios B2C" (es una pestaña nueva, distinta a "Usuarios" general). Solo muestra los que pagan o pueden pagar plan Plus.',
+    doStr: 'En "Usuarios y Marcas", andá a la pestaña "Usuarios B2C" (distinta a la pestaña "Usuarios" general). Muestra los usuarios finales que pagan o pueden pagar plan Plus.',
     seeStr: 'Aparece una tabla con los usuarios finales: usuario, plan que tienen (o "—" si están en Free), cuánto usaron este mes, y desde cuándo están registrados.',
     mockup: 'usersB2cTable',
     mockupCaption: 'La tabla de usuarios B2C',
   },
-  { id: 16, block: '5. Manejo de usuarios B2C', n: 16,
+  { id: 20, block: '6. Manejo de usuarios B2C', n: 20,
     criticality: 'low',
     title: 'Filtrar usuarios cerca del límite',
-    doStr: 'En la misma pantalla, arriba hay 2 switches: "Solo con plan" (filtra los que ya pagan) y "Solo upsell candidates (>=80%)". Probá los 2 (separados y combinados).',
+    doStr: 'En la pestaña "Usuarios B2C", arriba hay 2 switches: "Solo con plan" (filtra los que ya pagan) y "Solo upsell candidates (>=80%)". Probá los 2 (separados y combinados).',
     seeStr: 'La tabla se filtra según lo que activaste. "Solo con plan" deja solo los Plus. "Solo upsell" deja solo los que están al 80%+ de su límite. Combinados pueden quedar pocos o ninguno.',
   },
-  { id: 17, block: '5. Manejo de usuarios B2C', n: 17,
+  { id: 21, block: '6. Manejo de usuarios B2C', n: 21,
     criticality: 'high',
     title: 'Cambiar el tipo de un usuario (promover a brand o admin)',
-    doStr: 'Andá a la pestaña "Usuarios" (la general, no la B2C). Encontrá un usuario y clickeá en su tipo. Aparece un menú con opciones: User, Brand, Influencer, BrandsModerator, SiteAdmin, Admin. Probá cambiarlo a otra opción (ej. Influencer) y volverlo a User.',
+    doStr: 'Andá a "Usuarios y Marcas" → pestaña "Usuarios" (la general, no la B2C). Encontrá un usuario y clickeá en su "Tipo". Aparece un menú con opciones: User, Influencer, Brand, BrandsModerator, SiteAdmin, Admin. Probá cambiarlo a otra opción (ej. Influencer) y volverlo a User.',
     seeStr: 'El cambio se aplica al instante. NO podés cambiar tu propio tipo (te debería bloquear). NO promuevas a alguien a Admin a menos que sepas lo que estás haciendo — Admin tiene control total. Volvé al valor original.',
   },
 
-  // ----- BLOQUE 6: CONFIGURACIÓN DEL SITIO -----
-  { id: 18, block: '6. Configuración del sitio', n: 18,
+  // ----- BLOQUE 7: IMÁGENES Y TEXTOS DEL SITIO -----
+  { id: 22, block: '7. Imágenes y textos del sitio', n: 22,
     criticality: 'medium',
-    title: 'Cambiar imágenes del sitio (banner, logo, etc.)',
-    doStr: 'En el panel principal (Dashboard), andá a "Site Images" o "Imágenes del sitio". Vas a ver las imágenes que se usan en la home (banner principal, logos secundarios, etc.). Subí una imagen nueva como banner (cualquier imagen jpg). Guardá.',
+    title: 'Cambiar imágenes del sitio (banner, logo)',
+    doStr: 'En "Dashboard", entrá a la pestaña "Image Manager" (administrador de imágenes). Vas a ver los campos para el "Banner Image" (imagen del banner) y el "Logo Icon" (ícono del logo). Subí una imagen nueva como banner (cualquier imagen jpg). Guardá.',
     seeStr: 'Después de guardar, abrí el sitio principal en otra pestaña — el banner debería verse cambiado. Si no se ve el cambio, recargá con Ctrl+F5.',
   },
-  { id: 19, block: '6. Configuración del sitio', n: 19,
+  { id: 23, block: '7. Imágenes y textos del sitio', n: 23,
     criticality: 'medium',
-    title: 'Cambiar textos del sitio (títulos, footer)',
-    doStr: 'En "Text Manager" o "Textos del sitio", vas a ver textos editables como el título del home, el footer, mensajes de error, etc. Cambiá uno simple (ej. "Síguenos en nuestras redes") por algo distinto. Guardá.',
-    seeStr: 'Abrí el sitio principal. El texto que cambiaste debería estar reflejado. Acordate de volver al valor original después de la prueba.',
+    title: 'Editar los textos legales (Términos y Política de Privacidad)',
+    doStr: 'En "Dashboard", entrá a la pestaña "Text Manager" (administrador de textos). Vas a ver dos cuadros de texto grandes: "Terms of Service" (términos del servicio) y "Privacy Policy" (política de privacidad). Cambiá algo simple en uno de ellos y clickeá "Save Texts".',
+    seeStr: 'El cambio se guarda. Abrí el sitio principal y entrá a la página de Términos o de Privacidad (suelen estar enlazadas en el pie de página) — el texto que cambiaste debería verse reflejado. Acordate de volver al texto original después de la prueba.',
   },
 
-  // ----- BLOQUE 7: EMAIL TEMPLATES -----
-  { id: 20, block: '7. Plantillas de email', n: 20,
+  // ----- BLOQUE 8: EMAIL TEMPLATES -----
+  { id: 24, block: '8. Plantillas de email', n: 24,
     criticality: 'low',
     title: 'Ver las plantillas de email actuales',
-    doStr: 'En el panel, andá a "Email Template Manager" o "Plantillas de email". Vas a ver una lista de tipos de email que envía el sistema: verificación, recuperar contraseña, etc.',
-    seeStr: 'Cada plantilla se puede editar y tiene 4 versiones (una por idioma: ES, EN, FR, IT). Las pestañas de los idiomas se ven arriba del editor.',
+    doStr: 'En "Dashboard", entrá a la pestaña "Email Template Manager" (administrador de plantillas de email). Vas a ver un selector "Select Email Type" para elegir el tipo de email que envía el sistema (verificación, recuperar contraseña, etc.). Elegí uno.',
+    seeStr: 'Al elegir un tipo, aparecen 4 pestañas de idioma arriba del editor: EN, ES, FR e IT. Cada idioma tiene su propio "Subject" (asunto) y "Body" (cuerpo) editables.',
     mockup: 'emailTemplateEditor',
     mockupCaption: 'El editor de plantillas de email',
   },
-  { id: 21, block: '7. Plantillas de email', n: 21,
+  { id: 25, block: '8. Plantillas de email', n: 25,
     criticality: 'medium',
     title: 'Editar una plantilla en español',
-    doStr: 'Elegí la plantilla "Verificación de correo" (o cualquiera). En la pestaña "ES", cambiá algo simple — por ejemplo, agregale "¡" al inicio del asunto. Guardá.',
-    seeStr: 'El cambio se guarda. Si arriba aparece un cartel amarillo "Cambios sin guardar", es porque te falta confirmar (clickeá Guardar). Si los 4 idiomas tienen distintos textos, asegurate de editar el que corresponda (ES para español).',
+    doStr: 'Con un tipo de email elegido, entrá a la pestaña de idioma "ES". Cambiá algo simple en el "Subject (ES)" — por ejemplo, agregale un signo al inicio del asunto. Clickeá "Save Email Text".',
+    seeStr: 'El cambio se guarda. Si arriba aparece un cartel amarillo "You have unsaved changes" (tenés cambios sin guardar), es porque te falta confirmar — clickeá "Save". Asegurate de editar la pestaña "ES" para el texto en español.',
   },
-  { id: 22, block: '7. Plantillas de email', n: 22,
+  { id: 26, block: '8. Plantillas de email', n: 26,
     criticality: 'high',
     title: 'Probar que llega el email modificado (registrate o pedí recuperar contraseña)',
     doStr: 'Para verificar que tu cambio se aplica realmente: salí de tu cuenta y en el formulario de "Crear cuenta" creá una cuenta nueva con un email tuyo accesible. El email que te llegue debería tener el cambio que hiciste en el paso anterior.',
     seeStr: 'Recibís el email de verificación. El asunto/cuerpo refleja tu cambio. Si no llega, revisá spam. Si sigue sin llegar, hay un problema con el sistema de emails — reportalo. Volvé a la cuenta de Admin original cuando termines.',
   },
 
-  // ----- BLOQUE 8: CONTENIDO EDITORIAL -----
-  { id: 23, block: '8. Contenido editorial', n: 23,
+  // ----- BLOQUE 9: CONTENIDO EDITORIAL -----
+  { id: 27, block: '9. Contenido editorial', n: 27,
     criticality: 'medium',
-    title: 'Manejar Novedades (News slides de la home)',
-    doStr: 'En el panel, andá a "News" o "Novedades". Vas a ver las slides que aparecen en la home (carrusel grande arriba). Agregá una nueva: elegí una prenda destacada, subí una imagen, ponele un orden de visualización. Guardá.',
+    title: 'Manejar Novedades (slides de la home)',
+    doStr: 'En el menú de la izquierda, entrá a "Novedades". Vas a ver las slides que aparecen en la home (el carrusel grande de arriba). Agregá una nueva: elegí una prenda destacada, subí una imagen, ponele un orden de visualización. Guardá.',
     seeStr: 'En el panel se ve la slide nueva en la lista. Si abrís la home, el carrusel debería incluir tu slide nueva. Acordate de marcarla como "no visible" después si era solo de prueba.',
   },
-  { id: 24, block: '8. Contenido editorial', n: 24,
+  { id: 28, block: '9. Contenido editorial', n: 28,
     criticality: 'medium',
     title: 'Manejar categorías (tipos, categorías, eventos)',
-    doStr: 'En el panel, andá a "Categories". Vas a ver 3 pestañas: Tipos (camisa, pantalón, etc.), Categorías (subdivisiones), Eventos (verano, casual, formal). Creá una categoría nueva de prueba.',
+    doStr: 'En el menú de la izquierda, entrá a "Categorías". Vas a ver pestañas: Tipos (camisa, pantalón, etc.), Categorías (subdivisiones) y Eventos (verano, casual, formal). Creá una categoría nueva de prueba.',
     seeStr: 'La categoría nueva aparece en la lista y debería estar disponible para usarse cuando creás una prenda. Si la creaste solo para probar, borrala después.',
   },
-  { id: 25, block: '8. Contenido editorial', n: 25,
+  { id: 29, block: '9. Contenido editorial', n: 29,
     criticality: 'low',
-    title: 'Manejar Multimedia (biblioteca de imágenes)',
-    doStr: 'En el panel, andá a "Multimedia". Vas a ver todas las imágenes subidas al sitio (banners, logos, imágenes de prendas, etc.). Probá subir una imagen nueva.',
-    seeStr: 'La imagen aparece en la lista con un nombre y previsualización. Esta es la biblioteca general — desde acá podés referenciar imágenes en otras partes (slides, banners).',
+    title: 'Usar la biblioteca multimedia (al cargar una prenda)',
+    doStr: 'La biblioteca de imágenes se usa desde el editor de prendas. En el menú de la izquierda entrá a "Prendas", abrí una prenda para editar (o creá una nueva) y en el campo de imagen clickeá para elegir/subir una imagen — se abre la biblioteca multimedia.',
+    seeStr: 'Se abre una ventana (modal) con todas las imágenes ya subidas al sitio, más la opción de subir una nueva. Desde ahí seleccionás la imagen para la prenda. Si subís una nueva, queda disponible en la biblioteca para reusarla en otras prendas.',
   },
 
-  // ----- BLOQUE 9: IMPORTER + SETTINGS + ADSENSE -----
-  { id: 26, block: '9. Herramientas avanzadas', n: 26,
+  // ----- BLOQUE 10: IMPORTADOR + CONFIGURACIONES + ADSENSE -----
+  { id: 30, block: '10. Configuración del sistema y publicidad', n: 30,
     criticality: 'medium',
-    title: 'Probar el Importer (importar prendas desde una URL externa)',
-    doStr: 'En el panel, andá a "Importer". Esta herramienta sirve para importar prendas masivamente desde el sitio de una marca. Probá con la URL del catálogo de una marca real. Configurá una "plantilla" si es necesario y dale "Preview".',
-    seeStr: 'La pantalla muestra las prendas que detectó automáticamente (nombre, precio, foto). Podés revisarlas y decidir cuáles importar. Es una herramienta poderosa — usarla con cuidado para no llenar el catálogo de cosas que no querés.',
+    title: 'Probar el Importador (importar prendas desde una URL externa)',
+    doStr: 'En el menú de la izquierda, entrá a "Importador". Esta herramienta sirve para importar prendas masivamente desde el sitio de una marca. Probá con la URL del catálogo de una marca real, configurá una "plantilla" si es necesario y dale "Preview".',
+    seeStr: 'La pantalla muestra las prendas que detectó automáticamente (nombre, precio, foto). Podés revisarlas y decidir cuáles importar. Importante: si la marca tiene un plan con tope de prendas, el importador respeta ese tope (trunca lo que exceda) para no pasarse del límite del plan. Usala con cuidado para no llenar el catálogo de cosas que no querés.',
   },
-  { id: 27, block: '9. Herramientas avanzadas', n: 27,
+  { id: 31, block: '10. Configuración del sistema y publicidad', n: 31,
     criticality: 'low',
-    title: 'Ver las configuraciones del sistema (System Settings)',
-    doStr: 'En el panel, andá a "System Settings" o "Configuraciones del sistema". Vas a ver una lista grande de configuraciones generales: límites por defecto, switches generales, configuraciones de AdSense, etc.',
-    seeStr: 'Cada fila es una configuración con su valor actual. Algunas son booleanas (true/false), otras son números (límites), otras son textos (IDs de AdSense, mensajes globales). Es la "caja de herramientas" del SuperAdmin.',
+    title: 'Ver las configuraciones del sistema (General Configurations)',
+    doStr: 'En "Dashboard" → "Site Configurations" → sub-pestaña "General Configurations". Vas a ver una lista de configuraciones generales del sitio: límites por defecto, ciclo de medición, IDs de AdSense, etc. Cada fila trae un nombre amigable arriba y la clave técnica chiquita abajo.',
+    seeStr: 'Cada fila es una configuración con su valor actual y una descripción de para qué sirve. Algunas son interruptores (true/false), otras son números (límites), otras son textos (IDs de AdSense). Es la "caja de herramientas" del SuperAdmin.',
     mockup: 'systemSettings',
-    mockupCaption: 'La pantalla de System Settings (algunos ejemplos)',
+    mockupCaption: 'La pantalla de configuraciones (General Configurations)',
   },
-  { id: 28, block: '9. Herramientas avanzadas', n: 28,
+  { id: 32, block: '10. Configuración del sistema y publicidad', n: 32,
+    criticality: 'low',
+    title: 'Probar "Testear como tier" (ver el sitio con los límites de un nivel)',
+    doStr: 'En "Site Configurations" → sub-pestaña "Test Configurations" vas a ver el combo "Testear como:". Elegí un nivel de la lista (están agrupados en USER y BRAND). Después navegá el sitio como lo haría ese tipo de usuario. Cuando termines, volvé al combo y elegí "Sin límite (default)" (o limpialo con la X).',
+    seeStr: 'Al elegir un nivel aparece una etiqueta amarilla "Límites activos: ..." y tu cuenta empieza a comportarse con los límites de ese nivel (por ejemplo, topes de búsquedas o de clicks), aunque seas admin. Esto reemplaza al viejo "cupo ilimitado de admin" — sirve para que pruebes los límites reales sin crear una cuenta aparte. Al volver a "Sin límite", tu cuenta vuelve a no tener topes.',
+  },
+  { id: 33, block: '10. Configuración del sistema y publicidad', n: 33,
     criticality: 'high',
     title: 'Activar el modo demo de AdSense (para mostrar publicidad de prueba)',
-    doStr: 'En System Settings, buscá la configuración "google_adsense_demo_mode". Cambiala de "off" a "mock". Guardá.',
+    doStr: 'En "Site Configurations" → sub-pestaña "Test Configurations", buscá la configuración "google_adsense_demo_mode". Cambiá su valor de "off" a "mock". Guardá (botón de tilde).',
     seeStr: 'Después de guardar, salí de tu cuenta. Hacé login con un usuario de prueba (tipo Free). Hacé clicks en varias prendas para llegar al punto donde aparece la publicidad. Ahora debería aparecer una ventana con un cartel "MODO DEMO" + una publicidad simulada con imagen, marca, etc. (no es publicidad real).',
   },
-  { id: 29, block: '9. Herramientas avanzadas', n: 29,
+  { id: 34, block: '10. Configuración del sistema y publicidad', n: 34,
     criticality: 'medium',
     title: 'Volver el modo AdSense a "off" después de las demos',
-    doStr: 'Cuando termines la prueba o la demo con el cliente, volvé a System Settings y cambiá "google_adsense_demo_mode" de "mock" a "off". Guardá.',
+    doStr: 'Cuando termines la prueba o la demo con el cliente, volvé a "Test Configurations" y cambiá "google_adsense_demo_mode" de "mock" a "off". Guardá.',
     seeStr: 'Después de guardar, los usuarios vuelven a ver el cartel simple original (sin la publicidad mock). Cuando AdSense esté aprobado por Google y tengas el slot_id real, podés cambiar "mock" por "real" para mostrar publicidad real.',
   },
-  { id: 30, block: '9. Herramientas avanzadas', n: 30,
+  { id: 35, block: '10. Configuración del sistema y publicidad', n: 35,
     criticality: 'high',
     title: 'Cuando AdSense esté aprobado: cargar publisher_id y slot_id reales',
-    doStr: 'Cuando Google AdSense apruebe tu cuenta (toma semanas), te van a dar dos códigos: el Publisher ID (ca-pub-XXXXXXXX) y el Slot ID (numérico). Cargalos en System Settings: google_adsense_publisher_id y google_adsense_default_slot_id. Después cambiá google_adsense_enabled de "false" a "true". Guardá los 3 cambios.',
+    doStr: 'Cuando Google AdSense apruebe tu cuenta (toma semanas), te van a dar dos códigos: el Publisher ID (ca-pub-XXXXXXXX) y el Slot ID (numérico). Cargalos en "Site Configurations" → "General Configurations": google_adsense_publisher_id y google_adsense_default_slot_id. Después cambiá google_adsense_enabled de "false" a "true". Guardá los cambios.',
     seeStr: 'Después de guardar, los usuarios Free que lleguen al umbral de clicks van a ver publicidades REALES de Google AdSense. Esto te genera ingresos cuando los usuarios las clickean. Asegurate de tener google_adsense_demo_mode en "off" antes de activar el real, sino se sigue mostrando el mock.',
   },
-  { id: 31, block: '9. Herramientas avanzadas', n: 31,
+  { id: 36, block: '10. Configuración del sistema y publicidad', n: 36,
     criticality: 'high',
     title: 'Pausar todas las publicidades de emergencia (kill switch)',
-    doStr: 'Si por algún motivo querés sacar TODA la publicidad del sitio sin esperar nada (por ej. un problema con AdSense): andá a System Settings, cambiá "google_adsense_enabled" de "true" a "false". Guardá.',
+    doStr: 'Si por algún motivo querés sacar TODA la publicidad real del sitio sin esperar nada (por ej. un problema con AdSense): en "Site Configurations" → "General Configurations" cambiá "google_adsense_enabled" de "true" a "false". Guardá.',
     seeStr: 'Las publicidades reales dejan de mostrarse inmediatamente. Los usuarios siguen viendo el cartel simple sin publicidad. No hace falta desplegar nada nuevo — el cambio es instantáneo desde tu panel.',
   },
-  { id: 32, block: '9. Herramientas avanzadas', n: 32,
-    criticality: 'medium',
-    title: 'Resumen — Salir de tu cuenta y volver a chequear que todo sigue bien',
-    doStr: 'Después de todas estas pruebas, salí de tu cuenta (logout). Abrí el sitio principal como usuario anónimo. Buscá una prenda, mirá si todo se ve bien, intentá entrar a /admin sin login — debería pedirte loguearte. Volvé a tu cuenta de Admin y verificá que el panel se sigue viendo igual que al principio.',
-    seeStr: 'Todo sigue funcionando normal para usuarios anónimos. El panel de admin sigue accesible para vos. Los cambios que dejaste hechos (si dejaste alguno) están reflejados. ¡Listo, llegaste al final de la prueba!',
-  },
-  { id: 33, block: '9. Herramientas avanzadas', n: 33,
+  { id: 37, block: '10. Configuración del sistema y publicidad', n: 37,
     criticality: 'low',
     title: 'Recorrer el resto de configuraciones del sistema (opcional)',
-    doStr: 'En System Settings vas a ver MÁS configuraciones que las de AdSense que ya probamos (anonymous_search_limit, user_free_search_limit, user_free_favorite_limit, user_free_ads_after_clicks, user_free_catalog_cap, user_free_search_filter_limit). Recorré la lista, identificá cuáles entendés y cuáles no. Si tenés ganas, probá editar UNA cualquiera (por ejemplo cambiá el limit de búsquedas anónimas de 5 a 3) y guardá. Después devolvelo a su valor original.',
-    seeStr: 'Cada configuración tiene su descripción que explica para qué sirve. Después de guardar un cambio, el comportamiento de la app debería reflejarlo en la siguiente acción del usuario afectado (ej. el límite anónimo se aplica al próximo visitante sin cuenta). Si alguna configuración te resulta confusa o falta su descripción, anotalo. Si no llegás a probar esta parte, marcala como "No lo probé" — es opcional.',
+    doStr: 'En "General Configurations" vas a ver MÁS configuraciones que las de AdSense que ya probamos. Cada fila trae un nombre amigable arriba y la clave técnica chiquita abajo. Entre ellas: "Búsquedas para visitantes sin cuenta", "Búsquedas mensuales — usuario Free", "Favoritos máximos — usuario Free", "Búsquedas con filtros mensuales — usuario Free", "Clicks antes de mostrar publicidad — usuario Free" y "Tope de prendas visibles — usuario Free". Recorré la lista y leé cada descripción. Si tenés ganas, probá editar UNA cualquiera (por ejemplo bajá las búsquedas para visitantes de 5 a 3) y guardá. Después devolvelo al valor original.',
+    seeStr: 'Cada configuración tiene un nombre amigable + la descripción explica para qué sirve. Después de guardar un cambio, el comportamiento de la app debería reflejarlo en la siguiente acción del usuario afectado (ej. el límite de búsquedas para visitantes se aplica al próximo visitante sin cuenta). Si alguna configuración te resulta confusa, anotalo. Si no llegás a probar esta parte, marcala como "No lo probé" — es opcional.',
+  },
+  { id: 38, block: '10. Configuración del sistema y publicidad', n: 38,
+    criticality: 'medium',
+    title: 'Conocer el modo del ciclo de medición',
+    doStr: 'En "General Configurations" identificá la configuración del ciclo de medición (clave técnica: user_metering_cycle_days). Ahora es un selector de modo con 3 opciones: "Día (24 horas)", "Semana (7 días)" y "Mensual (mismo día del mes)". Define cada cuánto se reinician las cuentas del usuario Free (búsquedas con filtros, clicks de publicidad). Leé la descripción. Si querés acelerar pruebas, ponelo en "Día" o "Semana"; para producción normal va "Mensual". Acordate de dejarlo en el valor correcto al terminar.',
+    seeStr: 'El selector muestra los 3 modos. El que elijas define cuándo se resetean los contadores del usuario Free. Confirmá que la descripción se entiende. Esta configuración normalmente solo se toca para acelerar QA o para alinear con el mes calendario — el SuperAdmin tiene que saber que existe pero no la cambia todos los días.',
   },
 
-  // ----- BLOQUE 10: PAGOS REALES END-TO-END (validación crítica con MP en vivo) -----
-  { id: 34, block: '10. Pagos reales end-to-end (MercadoPago)', n: 34,
-    criticality: 'high',
-    title: 'Crear 3 planes de prueba con valores BAJOS en MercadoPago + asociarlos',
-    doStr: 'IMPORTANTE: para validar el flujo completo de cobro en vivo necesitamos planes con valores reales pero CHICOS (sugerencia: ARS 500, ARS 1000, ARS 1500). En tu panel de MercadoPago creá esos 3 planes (los podés llamar "Prueba Plus", "Prueba Premium", "Prueba User Plus"). Después en BOIS andá a Planes → "+ Nuevo plan" → asociá cada uno con su plan de MP via el combo (NO uses los planes productivos reales todavía).',
-    seeStr: 'Los 3 planes nuevos aparecen en la tabla de Planes con su MP Plan ID real (NO debe empezar con "dev-mock-"). Al editar cada uno, el combo MP los lista correctamente y el precio + moneda se autocompletan disabled. Recordá: estos son planes de PRUEBA — los podés borrar de MP después de las pruebas.',
+  // ----- BLOQUE 11: CIERRE (tab administración) -----
+  { id: 39, block: '11. Cierre del tab de administración', n: 39,
+    criticality: 'medium',
+    title: 'Salir de tu cuenta y verificar que todo sigue bien',
+    doStr: 'Cuando termines las pruebas de administración de este tab, salí de tu cuenta (logout). Abrí el sitio principal como visitante anónimo: buscá una prenda, mirá que todo se vea bien, e intentá entrar al panel de administración sin login — debería pedirte loguearte. Volvé a tu cuenta de Admin y verificá que el panel se sigue viendo igual que al principio.',
+    seeStr: 'Todo sigue funcionando normal para visitantes anónimos. El panel de admin sigue accesible para vos. Los cambios que dejaste hechos (si dejaste alguno) están reflejados. ¡Terminaste el tab de administración! Ahora pasá al tab "Flujo E2E: Suscripciones de Marca" para validar el cobro real de punta a punta.',
   },
-  { id: 35, block: '10. Pagos reales end-to-end (MercadoPago)', n: 35,
+
+  // =====================================================================
+  // TAB E2E: FLUJO COMPLETO DE SUSCRIPCIONES DE MARCA (cobros reales)
+  // Es el flujo más importante del negocio. Todos los pasos llevan tab:'e2e'.
+  // =====================================================================
+
+  // ----- E2E · 1. Preparación de los planes de prueba -----
+  { id: 40, tab: 'e2e', block: 'E2E · 1. Preparación de los planes de prueba', n: 1,
     criticality: 'high',
-    title: 'Suscribirse como BRAND con tarjeta REAL (cargo real $500-$1500)',
-    doStr: 'Salí de tu cuenta de SuperAdmin. Creá una cuenta NUEVA tipo BRAND (registro normal). Una vez con tu marca creada, andá a /pricing → elegí el plan más barato (Prueba Plus ARS 500) → clickeá "Suscribirme". Se abre MercadoPago en una pestaña nueva. Completá con UNA TARJETA REAL tuya (se va a cobrar ARS 500 de verdad — por eso elegimos un valor bajo). Confirmá el pago.',
-    seeStr: 'Después del pago exitoso, MP redirige de vuelta al perfil. La marca ahora muestra "Plan Plus activo" en el dashboard con la fecha de vencimiento. Si vas a la cuenta SuperAdmin → tab Brands, esta marca aparece con plan asociado. Si vas a Payments → debería aparecer el registro del cobro. Verificá tu cuenta MP/tarjeta — el cobro debe estar registrado.',
+    title: 'Crear 3 planes "baratos" en MercadoPago (ARS 500 / 1.000 / 1.500)',
+    doStr: 'IMPORTANTE: para validar el cobro real de punta a punta necesitamos planes con valores reales pero CHICOS. En TU panel de MercadoPago creá 3 planes de suscripción: uno de ARS 500, uno de ARS 1.000 y uno de ARS 1.500 (los podés llamar "Prueba 500", "Prueba 1000", "Prueba 1500"). La cuenta de MP usa tu tarjeta real. Todavía NO toques nada en BOIS en este paso.',
+    seeStr: 'En tu panel de MercadoPago aparecen los 3 planes nuevos, cada uno con su precio (500, 1.000, 1.500 ARS) y en estado activo. Tené a mano sus nombres — los vas a elegir desde BOIS en el próximo paso.',
   },
-  { id: 36, block: '10. Pagos reales end-to-end (MercadoPago)', n: 36,
+  { id: 41, tab: 'e2e', block: 'E2E · 1. Preparación de los planes de prueba', n: 2,
     criticality: 'high',
-    title: 'Hacer upgrade de plan en esa BRAND (de Plus → Premium)',
-    doStr: 'Con la cuenta de BRAND recién creada (todavía logueada), andá al panel y buscá "Cambiar plan" o "Mejorar plan". Elegí el plan "Prueba Premium" (ARS 1500). Confirmá. Se abre MP otra vez para autorizar el nuevo cobro (ARS 1500 - ARS 500 proporcional, o cobro full según el modelo del cliente).',
-    seeStr: 'El plan activo de la marca pasa a Premium. La fecha de vencimiento se actualiza al cobro nuevo. El cobro anterior queda como histórico. Si el sistema cancela automáticamente el plan anterior y cobra el nuevo, lo importante es que NO quede una doble facturación activa simultánea. Verificá en MP que solo hay 1 suscripción active asociada a tu mail.',
+    title: 'Asociar los 3 planes de MercadoPago a los planes de BOIS',
+    doStr: 'En BOIS andá a "Dashboard" → "Tiers & Suscripciones" → "Marca" → "Planes". Para cada plan de marca clickeá "Editar" (o creá uno con "Agregar plan") y en el combo "Plan de MercadoPago" elegí el plan de prueba que corresponda (el de 500, el de 1.000 o el de 1.500). El precio y la moneda se autocompletan solos. Guardá. (NO asocies todavía tus planes productivos reales de 69k/169k.)',
+    seeStr: 'Cada plan queda con un MP Plan ID real que NO empieza con "dev-mock-", y con el cartelito verde "MP: active". El precio y la moneda quedan grises (sincronizados desde MercadoPago). Así los planes ya pueden cobrar de verdad.',
+    mockup: 'planFormMpCombo',
+    mockupCaption: 'El plan después de asociarlo a MercadoPago',
   },
-  { id: 37, block: '10. Pagos reales end-to-end (MercadoPago)', n: 37,
+  { id: 42, tab: 'e2e', block: 'E2E · 1. Preparación de los planes de prueba', n: 3,
+    criticality: 'low',
+    title: 'Revisar qué nivel (Tier) y límites desbloquea cada plan',
+    doStr: 'En "Tiers & Suscripciones" → "Marca" → "Configuración de niveles" mirá los límites de cada nivel (prendas, imágenes de revista). Relacioná: el plan más barato apunta a un nivel y el más caro a otro. Así sabés qué debería cambiar para la marca cuando pague.',
+    seeStr: 'Entendés qué desbloquea cada plan: por ejemplo, el nivel Plus permite X prendas y el Premium ilimitado. Esto es lo que vas a verificar que efectivamente cambie cuando una marca se suscriba o haga upgrade.',
+  },
+
+  // ----- E2E · 2. Crear las marcas fake y suscribirlas -----
+  { id: 43, tab: 'e2e', block: 'E2E · 2. Crear las marcas fake y suscribirlas', n: 4,
     criticality: 'high',
-    title: 'Cancelar la suscripción de esa BRAND',
-    doStr: 'Con la misma cuenta BRAND, andá al perfil → "Cancelar suscripción". Confirmá el cartel que te explica el grace period (la marca conserva acceso hasta la fecha de vencimiento del último cobro).',
-    seeStr: 'El plan de la marca queda con estado "Cancelado pero activo hasta {fecha}". Mientras estés en ese período, todavía podés subir prendas. Después de la fecha, la marca pasa a estado Free (sin acceso de publicación, prendas se borran automáticamente — esto último lo va a hacer el cron, no lo verás inmediato). En tu cuenta MercadoPago, la suscripción debe figurar como cancelada — no debería haber cobros futuros automáticos.',
+    title: 'Crear 3 marcas fake (registro BRAND nuevo)',
+    doStr: 'Salí de tu cuenta de SuperAdmin. Creá 3 cuentas NUEVAS de tipo BRAND con el registro normal (una por una; podés usar 3 correos accesibles tuyos, por ej. con +alias). Completá los datos mínimos de cada marca. Llamalas por ej. "Marca Fake 1 / 2 / 3".',
+    seeStr: 'Las 3 cuentas se crean y podés iniciar sesión con cada una. Cada marca arranca sin plan (Free): todavía no puede publicar o tiene el tope mínimo. Tip: también podés crear un usuario y promoverlo a Brand desde "Usuarios y Marcas" → "Usuarios", pero el registro normal es lo más parecido a lo que hará un cliente real.',
+  },
+  { id: 44, tab: 'e2e', block: 'E2E · 2. Crear las marcas fake y suscribirlas', n: 5,
+    criticality: 'high',
+    title: 'Suscribir la Marca Fake 1 al plan de ARS 500 con tarjeta REAL',
+    doStr: 'Logueado como Marca Fake 1, andá a /pricing (o "Suscribirme" / "Mejorar plan"). Elegí el plan de ARS 500 y clickeá "Suscribirme". Se abre MercadoPago en una pestaña nueva. Completá con UNA TARJETA REAL tuya (se cobra ARS 500 de verdad). Confirmá el pago.',
+    seeStr: 'Después del pago exitoso, MP redirige de vuelta al perfil. La marca pasa a mostrar su plan activo con la fecha de vencimiento. Si no redirige solo, recargá el perfil. El cobro de ARS 500 debe figurar en tu cuenta/tarjeta de MercadoPago.',
+  },
+  { id: 45, tab: 'e2e', block: 'E2E · 2. Crear las marcas fake y suscribirlas', n: 6,
+    criticality: 'high',
+    title: 'Verificar la suscripción de la Marca Fake 1 en los 3 lugares',
+    doStr: 'Verificá la suscripción que acabás de hacer en 3 lados: (1) en el perfil/dashboard de la propia marca; (2) en tu cuenta SuperAdmin → "Usuarios y Marcas" → "Marcas" (buscá la marca y mirá su suscripción); (3) en tu panel de MercadoPago (la suscripción y el cobro).',
+    seeStr: 'Los 3 lugares coinciden: la marca tiene el plan activo, con su fecha de vencimiento, y aparece 1 suscripción + 1 cobro en MercadoPago. Además, la marca ahora debería poder publicar según el límite del nivel asociado a ese plan (verificá que el tope subió respecto del Free).',
+  },
+  { id: 46, tab: 'e2e', block: 'E2E · 2. Crear las marcas fake y suscribirlas', n: 7,
+    criticality: 'high',
+    title: 'Suscribir la Marca Fake 2 (ARS 1.000) y la Marca Fake 3 (ARS 1.500)',
+    doStr: 'Repetí el flujo de suscripción con las otras 2 marcas: logueate como Marca Fake 2 y suscribila al plan de ARS 1.000; después como Marca Fake 3 y suscribila al de ARS 1.500. Cada una con tarjeta real (cobros reales de 1.000 y 1.500).',
+    seeStr: 'Las 3 marcas quedan con plan activo, cada una en su plan. En MercadoPago figuran los 3 cobros (500, 1.000 y 1.500). En SuperAdmin → "Usuarios y Marcas" → "Marcas" las 3 aparecen con su suscripción. Esto confirma que los 3 planes cobran correctamente de punta a punta.',
+  },
+
+  // ----- E2E · 3. Upgrade de plan de una marca -----
+  { id: 47, tab: 'e2e', block: 'E2E · 3. Upgrade de plan de una marca', n: 8,
+    criticality: 'high',
+    title: 'Hacer upgrade de plan en una marca fake (a un plan más caro)',
+    doStr: 'Logueado como una de las marcas fake (ej. Marca Fake 1, que está en el plan de 500), andá al panel y buscá "Cambiar plan" o "Mejorar plan". Elegí un plan más caro (ej. el de 1.500). Confirmá. Se abre MercadoPago para autorizar el nuevo cobro.',
+    seeStr: 'El plan activo de la marca pasa al plan más caro. La fecha de vencimiento se actualiza al cobro nuevo. El límite del nivel debería subir acorde al plan nuevo.',
+  },
+  { id: 48, tab: 'e2e', block: 'E2E · 3. Upgrade de plan de una marca', n: 9,
+    criticality: 'high',
+    title: 'Verificar el upgrade — que NO haya doble facturación',
+    doStr: 'Revisá en tu panel de MercadoPago las suscripciones asociadas a esa marca/mail. Confirmá que quedó UNA sola suscripción activa (la del plan nuevo) y no dos cobrando en paralelo.',
+    seeStr: 'En MercadoPago hay 1 sola suscripción activa para esa marca. La anterior quedó cancelada o reemplazada — el cobro anterior queda solo como histórico. NO debe haber 2 suscripciones cobrando a la vez. Si ves 2 activas, reportalo: es crítico.',
+  },
+
+  // ----- E2E · 4. Cancelación de suscripción -----
+  { id: 49, tab: 'e2e', block: 'E2E · 4. Cancelación de suscripción', n: 10,
+    criticality: 'high',
+    title: 'Cancelar la suscripción de una marca fake',
+    doStr: 'Logueado como una de las marcas fake (ej. Marca Fake 2), andá al perfil → "Cancelar suscripción". Confirmá el cartel que te explica el grace period (la marca conserva acceso hasta la fecha de vencimiento del último cobro).',
+    seeStr: 'El plan de la marca queda con estado "Cancelado pero activo hasta {fecha}". Mientras dura ese período, la marca todavía puede publicar. La cancelación se aplica sin error.',
+  },
+  { id: 50, tab: 'e2e', block: 'E2E · 4. Cancelación de suscripción', n: 11,
+    criticality: 'high',
+    title: 'Verificar la cancelación — que no haya cobros futuros',
+    doStr: 'Revisá en tu panel de MercadoPago la suscripción de la marca que cancelaste. Confirmá que figura como cancelada y que no quedan cobros automáticos programados a futuro.',
+    seeStr: 'En MercadoPago la suscripción figura como cancelada, sin próximos cobros. En BOIS, después de la fecha de vencimiento, la marca pasa a Free (pierde el acceso de publicación; sus prendas se dan de baja por un proceso automático, no en el momento). Lo importante ahora: NO debe haber cobros futuros.',
+  },
+
+  // ----- E2E · 5. Limpieza -----
+  { id: 51, tab: 'e2e', block: 'E2E · 5. Limpieza', n: 12,
+    criticality: 'medium',
+    title: 'Limpieza: borrar marcas fake y planes de prueba',
+    doStr: 'Cuando termines de validar todo: en tu cuenta SuperAdmin → "Usuarios y Marcas" → "Marcas" borrá las 3 marcas fake. En tu panel de MercadoPago borrá (o pausá) los 3 planes de prueba de 500/1.000/1.500. Si habías tocado la asociación de algún plan productivo, dejá todo como estaba.',
+    seeStr: 'Las 3 marcas fake desaparecen del panel y del catálogo. Los planes de prueba ya no figuran activos en MercadoPago. Los planes productivos reales (69k/169k/9k) quedan bien asociados para el lanzamiento. ¡Listo! Validaste el flujo más importante del negocio de punta a punta.',
   },
 ];
 
@@ -1126,6 +1274,7 @@ function emptyState() {
       tester_name: '', tester_email: '', tester_browser: '', tester_date: '',
       started_at: new Date().toISOString(),
       last_saved_at: null,
+      active_tab: 'admin',
     },
     steps: Object.fromEntries(
       STEPS.map(s => [s.id, { status: 'pending', notes: '', images: [] }])
@@ -1160,6 +1309,39 @@ function saveState() {
 let state = loadState();
 
 // ============================================================================
+// Tabs
+// ============================================================================
+const TABS = [
+  { id: 'admin', label: '🛠 Herramientas de administración' },
+  { id: 'e2e', label: '💳 Flujo E2E: Suscripciones de Marca' },
+];
+
+function stepTab(step) { return step.tab || 'admin'; }
+function activeTab() { return state.meta.active_tab || 'admin'; }
+
+function setActiveTab(tabId) {
+  state.meta.active_tab = tabId;
+  saveState();
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderTabBar() {
+  const bar = document.getElementById('tab-bar');
+  if (!bar) return;
+  bar.innerHTML = '';
+  for (const tab of TABS) {
+    const steps = STEPS.filter(s => stepTab(s) === tab.id);
+    const done = steps.filter(s => state.steps[s.id] && state.steps[s.id].status !== 'pending').length;
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (activeTab() === tab.id ? ' active' : '');
+    btn.innerHTML = `${escapeHtml(tab.label)}<span class="tab-sub">${done} / ${steps.length} pasos</span>`;
+    btn.onclick = () => setActiveTab(tab.id);
+    bar.appendChild(btn);
+  }
+}
+
+// ============================================================================
 // Render
 // ============================================================================
 function renderAll() {
@@ -1168,10 +1350,13 @@ function renderAll() {
   document.getElementById('tester-browser').value = state.meta.tester_browser || '';
   document.getElementById('tester-date').value = state.meta.tester_date || '';
 
+  renderTabBar();
+
   const container = document.getElementById('steps-container');
   container.innerHTML = '';
   let currentBlock = null;
   for (const step of STEPS) {
+    if (stepTab(step) !== activeTab()) continue;
     if (step.block !== currentBlock) {
       currentBlock = step.block;
       const blockDiv = document.createElement('div');
@@ -1297,6 +1482,7 @@ function setStatus(stepId, status) {
   saveState();
   rerenderStepCard(stepId);
   updateSummary();
+  renderTabBar();
 }
 
 function updateNotes(stepId, value) {
