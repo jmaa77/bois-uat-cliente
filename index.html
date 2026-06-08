@@ -757,8 +757,8 @@ const STEPS = [
   { id: 3, block: 'Comenzar a usar la app', n: 3,
     criticality: 'high',
     title: 'Crear tu cuenta',
-    doStr: 'Buscá un botón o link que diga "Ingresar" o "Crear cuenta" (suele estar arriba a la derecha). Clickealo y elegí "Crear cuenta" o "Registrarse". Completá el formulario con tu correo real, una contraseña, etc. Confirmá.',
-    seeStr: 'Vas a ver un mensaje que dice algo así como "Te enviamos un correo de verificación". Revisá tu casilla de mail (puede caer en spam).',
+    doStr: 'Buscá "Ingresar" o "Crear cuenta" (arriba a la derecha) → "Registrarse". El registro es un asistente por pasos: (1) aceptar Términos y Condiciones, (2) aceptar Privacidad y Cookies, (3) tus datos (correo real, contraseña, nombre, fecha de nacimiento), (4) elegir un plan (Gratis o Plus), (5) "Pagar y suscribirme". Para esta prueba podés elegir el plan GRATIS (no pide tarjeta). Si elegís Plus, la tarjeta se carga ahí mismo, dentro de la misma página. Avanzá con "Continuar" y confirmá al final.',
+    seeStr: 'El registro va paso por paso (botón "Continuar" para avanzar, "Volver" para retroceder). NADA se crea ni se cobra hasta el botón final "Pagar y suscribirme". Al confirmar ves un mensaje tipo "Te enviamos un correo de verificación" (y, si elegiste Gratis, "Tu plan gratuito quedó activado"). Revisá tu casilla de mail (puede caer en spam).',
     mockup: 'loginForm',
     mockupCaption: 'El formulario de creación de cuenta',
   },
@@ -851,8 +851,8 @@ const STEPS = [
   { id: 15, block: 'Ver planes y suscripción', n: 15,
     criticality: 'high',
     title: 'Probar de suscribirte (opcional, no es necesario completar el pago)',
-    doStr: 'Clickeá el botón "Suscribirme" o "Suscribirme a Plus". Se abre una nueva pestaña con un formulario de Mercado Pago para ingresar tarjeta. NO completes el pago, solo verificá que se abre el formulario.',
-    seeStr: 'Se abre una pestaña nueva con el logo de Mercado Pago y un formulario para datos de tarjeta. Eso indica que la integración con Mercado Pago funciona. Podés cerrar la pestaña sin pagar.',
+    doStr: 'Clickeá "Suscribirme" o "Suscribirme a Plus". El formulario de tarjeta aparece DENTRO de la misma página (ya NO se abre Mercado Pago en otra pestaña). NO completes los datos ni confirmes — solo verificá que aparece el formulario de tarjeta integrado.',
+    seeStr: 'Aparece, en la misma página, un formulario para cargar la tarjeta (número, vencimiento, código, titular), sin abrir ninguna pestaña de Mercado Pago. Eso indica que la suscripción funciona. Dejalo sin completar. (Si confirmaras, el cobro se hace al instante y el plan se activa sin salir del sitio.)',
   },
 
   // ----- BLOCK F: EXTRA -----
@@ -906,12 +906,32 @@ function loadState() {
   }
 }
 
+let quotaWarned = false;
 function saveState() {
   state.meta.last_saved_at = new Date().toISOString();
+  var serialized;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    serialized = JSON.stringify(state);
   } catch (e) {
     toast('No se pudo guardar — el archivo está demasiado lleno. Descargá el reporte y empezá de nuevo.', 'err');
+    return;
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, serialized);
+  } catch (e) {
+    toast('No se pudo guardar — el archivo está demasiado lleno. Descargá el reporte y empezá de nuevo.', 'err');
+    return;
+  }
+  // #524: aviso proactivo al acercarse al límite de localStorage (~5MB).
+  // Avisamos una sola vez al cruzar el umbral; se rearma si el uso vuelve a
+  // bajar (p. ej. tras descargar y reiniciar).
+  if (serialized.length > 4000000) {
+    if (!quotaWarned) {
+      quotaWarned = true;
+      toast('El reporte se está llenando de capturas. Descargalo (⬇ Descargar reporte) y empezá de nuevo para no arriesgar perder datos.', 'err');
+    }
+  } else {
+    quotaWarned = false;
   }
 }
 
@@ -1070,7 +1090,7 @@ function handlePaste(e, stepId) {
       found = true;
       e.preventDefault();
       const file = item.getAsFile();
-      readFileAsDataURL(file).then(dataUrl => {
+      compressImage(file).then(dataUrl => {
         state.steps[stepId].images.push(dataUrl);
         saveState();
         rerenderGallery(stepId);
@@ -1083,7 +1103,7 @@ function handlePaste(e, stepId) {
 
 function handleFileUpload(e, stepId) {
   const files = Array.from(e.target.files || []);
-  Promise.all(files.map(readFileAsDataURL)).then(urls => {
+  Promise.all(files.map(function (f) { return compressImage(f); })).then(urls => {
     state.steps[stepId].images.push(...urls);
     saveState();
     rerenderGallery(stepId);
@@ -1098,6 +1118,39 @@ function readFileAsDataURL(file) {
     r.onload = () => resolve(r.result);
     r.onerror = reject;
     r.readAsDataURL(file);
+  });
+}
+
+// #524: comprime/redimensiona imágenes antes de guardarlas en localStorage.
+// Las capturas (PNG) pesan varios MB en base64 y llenan la cuota (~5MB) en
+// pocas. Redimensionamos a máx 1280px (lado mayor) y re-encodeamos a JPEG.
+// Fallbacks: no-imagen / sin dims / canvas falla / "comprimido" más grande
+// → se guarda el original.
+function compressImage(file, maxDim, quality) {
+  maxDim = maxDim || 1280;
+  quality = quality || 0.7;
+  return readFileAsDataURL(file).then(function (dataUrl) {
+    return new Promise(function (resolve) {
+      if (!file.type || file.type.indexOf('image/') !== 0) { resolve(dataUrl); return; }
+      var img = new Image();
+      img.onload = function () {
+        var w = img.naturalWidth, h = img.naturalHeight;
+        if (!w || !h) { resolve(dataUrl); return; }
+        var scale = Math.min(1, maxDim / Math.max(w, h));
+        w = Math.round(w * scale); h = Math.round(h * scale);
+        try {
+          var c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          var out = c.toDataURL('image/jpeg', quality);
+          resolve(out && out.length < dataUrl.length ? out : dataUrl);
+        } catch (err) {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = function () { resolve(dataUrl); };
+      img.src = dataUrl;
+    });
   });
 }
 

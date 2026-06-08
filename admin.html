@@ -1187,7 +1187,7 @@ const STEPS = [
   { id: 41, tab: 'e2e', block: 'E2E · 1. Preparación de los planes de prueba', n: 2,
     criticality: 'high',
     title: 'Asociar los 3 planes de MercadoPago a los planes de BOIS',
-    doStr: 'En BOIS andá a "Dashboard" → "Tiers & Suscripciones" → "Marca" → "Planes". Para cada plan de marca clickeá "Editar" (o creá uno con "Agregar plan") y en el combo "Plan de MercadoPago" elegí el plan de prueba que corresponda (el de 500, el de 1.000 o el de 1.500). El precio y la moneda se autocompletan solos. Guardá. (NO asocies todavía tus planes productivos reales de 69k/169k.)',
+    doStr: 'En BOIS andá a "Dashboard" → "Tiers & Suscripciones" → "Marca" → "Planes". Para cada plan de marca clickeá "Editar" (o creá uno con "Agregar plan") y en el combo "Plan de MercadoPago" elegí el plan de prueba que corresponda (el de 500, el de 1.000 o el de 1.500). El precio y la moneda se autocompletan solos. Guardá. (NO asocies todavía tus planes productivos reales de 69k/169k.) IMPORTANTE: el plan de MercadoPago tiene que estar ACTIVO en tu panel de MP. Si asociás un template cancelado/inactivo, el alta de la marca falla con un error de MercadoPago ("cannot create a new preapproval from a cancelled/inactive template").',
     seeStr: 'Cada plan queda con un MP Plan ID real que NO empieza con "dev-mock-", y con el cartelito verde "MP: active". El precio y la moneda quedan grises (sincronizados desde MercadoPago). Así los planes ya pueden cobrar de verdad.',
     mockup: 'planFormMpCombo',
     mockupCaption: 'El plan después de asociarlo a MercadoPago',
@@ -1203,20 +1203,20 @@ const STEPS = [
   { id: 43, tab: 'e2e', block: 'E2E · 2. Crear las marcas fake y suscribirlas', n: 4,
     criticality: 'high',
     title: 'Crear 3 marcas fake (registro BRAND nuevo)',
-    doStr: 'Salí de tu cuenta de SuperAdmin. Creá 3 cuentas NUEVAS de tipo BRAND con el registro normal (una por una; podés usar 3 correos accesibles tuyos, por ej. con +alias). Completá los datos mínimos de cada marca. Llamalas por ej. "Marca Fake 1 / 2 / 3".',
-    seeStr: 'Las 3 cuentas se crean y podés iniciar sesión con cada una. Cada marca arranca sin plan (Free): todavía no puede publicar o tiene el tope mínimo. Tip: también podés crear un usuario y promoverlo a Brand desde "Usuarios y Marcas" → "Usuarios", pero el registro normal es lo más parecido a lo que hará un cliente real.',
+    doStr: 'Salí de SuperAdmin. Registrá 3 cuentas BRAND nuevas con el registro normal (usá 3 correos tuyos, por ej. con +alias). El registro es un asistente por pasos: Términos y Condiciones → Información Usuario → Información Marca → Planes Disponibles → Pagar y Suscribirme. En "Planes Disponibles" elegí el plan GRATIS (así arrancan Free y las suscribís a un plan pago en el paso siguiente). Confirmá con "Pagar y suscribirme". IMPORTANTE: después tenés que VERIFICAR el email (link que llega a tu casilla) ANTES de poder iniciar sesión.',
+    seeStr: 'El registro avanza por pasos (Continuar/Volver) y nada se crea ni se cobra hasta el botón final. Al confirmar con plan Gratis ves "Te enviamos un correo de verificación" + "Tu plan gratuito quedó activado". Tras verificar el email, podés iniciar sesión. Las 3 marcas arrancan en Free (tope mínimo) y sin cobro. (Si al loguear ves un error 403 / "verificá tu email", es esperado: falta el click de verificación.)',
   },
   { id: 44, tab: 'e2e', block: 'E2E · 2. Crear las marcas fake y suscribirlas', n: 5,
     criticality: 'high',
     title: 'Suscribir la Marca Fake 1 al plan de ARS 500 con tarjeta REAL',
-    doStr: 'Logueado como Marca Fake 1, andá a /pricing (o "Suscribirme" / "Mejorar plan"). Elegí el plan de ARS 500 y clickeá "Suscribirme". Se abre MercadoPago en una pestaña nueva. Completá con UNA TARJETA REAL tuya (se cobra ARS 500 de verdad). Confirmá el pago.',
-    seeStr: 'Después del pago exitoso, MP redirige de vuelta al perfil. La marca pasa a mostrar su plan activo con la fecha de vencimiento. Si no redirige solo, recargá el perfil. El cobro de ARS 500 debe figurar en tu cuenta/tarjeta de MercadoPago.',
+    doStr: 'Logueado como Marca Fake 1, andá a /pricing (o "Suscribirme" / "Mejorar plan"). Elegí el plan de ARS 500. El formulario de tarjeta aparece DENTRO de la misma página (ya NO se abre Mercado Pago en otra pestaña). Cargá UNA TARJETA REAL tuya (se cobra ARS 500 de verdad) y confirmá "Pagar y suscribirme". Importante: el "Emisor de la tarjeta" se autodetecta del número y es de solo lectura; el nombre va en "Nombre del titular".',
+    seeStr: 'El pago se procesa al instante y la marca queda con el plan activo SIN salir del sitio (no hay redirect ni pestaña de MercadoPago). El cobro de ARS 500 figura en tu cuenta de MercadoPago. Si la tarjeta es rechazada, te muestra el error y te deja reintentar (re-cargando la tarjeta).',
   },
   { id: 45, tab: 'e2e', block: 'E2E · 2. Crear las marcas fake y suscribirlas', n: 6,
     criticality: 'high',
     title: 'Verificar la suscripción de la Marca Fake 1 en los 3 lugares',
     doStr: 'Verificá la suscripción que acabás de hacer en 3 lados: (1) en el perfil/dashboard de la propia marca; (2) en tu cuenta SuperAdmin → "Usuarios y Marcas" → "Marcas" (buscá la marca y mirá su suscripción); (3) en tu panel de MercadoPago (la suscripción y el cobro).',
-    seeStr: 'Los 3 lugares coinciden: la marca tiene el plan activo, con su fecha de vencimiento, y aparece 1 suscripción + 1 cobro en MercadoPago. Además, la marca ahora debería poder publicar según el límite del nivel asociado a ese plan (verificá que el tope subió respecto del Free).',
+    seeStr: 'Los 3 lugares coinciden: la marca tiene el plan activo con su fecha de vencimiento; en SuperAdmin → "Usuarios y Marcas" → "Marcas" aparece con su suscripción (debe figurar ahí, no solo en el dashboard de la marca); y en MercadoPago figura 1 suscripción + 1 cobro. Además, la marca ahora puede publicar según el límite del nivel asociado al plan (verificá que el tope subió respecto del Free).',
   },
   { id: 46, tab: 'e2e', block: 'E2E · 2. Crear las marcas fake y suscribirlas', n: 7,
     criticality: 'high',
@@ -1229,8 +1229,8 @@ const STEPS = [
   { id: 47, tab: 'e2e', block: 'E2E · 3. Upgrade de plan de una marca', n: 8,
     criticality: 'high',
     title: 'Hacer upgrade de plan en una marca fake (a un plan más caro)',
-    doStr: 'Logueado como una de las marcas fake (ej. Marca Fake 1, que está en el plan de 500), andá al panel y buscá "Cambiar plan" o "Mejorar plan". Elegí un plan más caro (ej. el de 1.500). Confirmá. Se abre MercadoPago para autorizar el nuevo cobro.',
-    seeStr: 'El plan activo de la marca pasa al plan más caro. La fecha de vencimiento se actualiza al cobro nuevo. El límite del nivel debería subir acorde al plan nuevo.',
+    doStr: 'Logueado como una de las marcas fake (ej. Marca Fake 1, en el plan de 500), buscá "Cambiar plan" o "Mejorar plan" y elegí uno más caro (ej. el de 1.500). El formulario de tarjeta aparece inline (sin abrir Mercado Pago); cargá la tarjeta real y confirmá "Pagar y suscribirme".',
+    seeStr: 'El cambio se aplica al instante sin salir del sitio: el plan activo de la marca pasa al más caro, la fecha de vencimiento se actualiza al cobro nuevo y el límite del nivel sube acorde al plan nuevo.',
   },
   { id: 48, tab: 'e2e', block: 'E2E · 3. Upgrade de plan de una marca', n: 9,
     criticality: 'high',
@@ -1297,12 +1297,32 @@ function loadState() {
   }
 }
 
+let quotaWarned = false;
 function saveState() {
   state.meta.last_saved_at = new Date().toISOString();
+  var serialized;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    serialized = JSON.stringify(state);
   } catch (e) {
     toast('No se pudo guardar — el archivo está demasiado lleno. Descargá el reporte y empezá de nuevo.', 'err');
+    return;
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, serialized);
+  } catch (e) {
+    toast('No se pudo guardar — el archivo está demasiado lleno. Descargá el reporte y empezá de nuevo.', 'err');
+    return;
+  }
+  // #524: aviso proactivo al acercarse al límite de localStorage (~5MB).
+  // Avisamos una sola vez al cruzar el umbral; se rearma si el uso vuelve a
+  // bajar (p. ej. tras descargar y reiniciar).
+  if (serialized.length > 4000000) {
+    if (!quotaWarned) {
+      quotaWarned = true;
+      toast('El reporte se está llenando de capturas. Descargalo (⬇ Descargar reporte) y empezá de nuevo para no arriesgar perder datos.', 'err');
+    }
+  } else {
+    quotaWarned = false;
   }
 }
 
@@ -1498,7 +1518,7 @@ function handlePaste(e, stepId) {
       found = true;
       e.preventDefault();
       const file = item.getAsFile();
-      readFileAsDataURL(file).then(dataUrl => {
+      compressImage(file).then(dataUrl => {
         state.steps[stepId].images.push(dataUrl);
         saveState();
         rerenderGallery(stepId);
@@ -1511,7 +1531,7 @@ function handlePaste(e, stepId) {
 
 function handleFileUpload(e, stepId) {
   const files = Array.from(e.target.files || []);
-  Promise.all(files.map(readFileAsDataURL)).then(urls => {
+  Promise.all(files.map(function (f) { return compressImage(f); })).then(urls => {
     state.steps[stepId].images.push(...urls);
     saveState();
     rerenderGallery(stepId);
@@ -1526,6 +1546,39 @@ function readFileAsDataURL(file) {
     r.onload = () => resolve(r.result);
     r.onerror = reject;
     r.readAsDataURL(file);
+  });
+}
+
+// #524: comprime/redimensiona imágenes antes de guardarlas en localStorage.
+// Las capturas (PNG) pesan varios MB en base64 y llenan la cuota (~5MB) en
+// pocas. Redimensionamos a máx 1280px (lado mayor) y re-encodeamos a JPEG.
+// Fallbacks: no-imagen / sin dims / canvas falla / "comprimido" más grande
+// → se guarda el original.
+function compressImage(file, maxDim, quality) {
+  maxDim = maxDim || 1280;
+  quality = quality || 0.7;
+  return readFileAsDataURL(file).then(function (dataUrl) {
+    return new Promise(function (resolve) {
+      if (!file.type || file.type.indexOf('image/') !== 0) { resolve(dataUrl); return; }
+      var img = new Image();
+      img.onload = function () {
+        var w = img.naturalWidth, h = img.naturalHeight;
+        if (!w || !h) { resolve(dataUrl); return; }
+        var scale = Math.min(1, maxDim / Math.max(w, h));
+        w = Math.round(w * scale); h = Math.round(h * scale);
+        try {
+          var c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          var out = c.toDataURL('image/jpeg', quality);
+          resolve(out && out.length < dataUrl.length ? out : dataUrl);
+        } catch (err) {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = function () { resolve(dataUrl); };
+      img.src = dataUrl;
+    });
   });
 }
 

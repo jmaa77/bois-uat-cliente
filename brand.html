@@ -825,8 +825,8 @@ const STEPS = [
   { id: 6, block: 'Tu suscripción', n: 6,
     criticality: 'high',
     title: 'Probar de cambiar de plan (sin completar el pago)',
-    doStr: 'Volvé a tu perfil o panel. Buscá un botón "Cambiar plan", "Mejorar plan" o "Suscribirme". Clickealo y elegí el plan que NO tenés actualmente. Cuando te pida confirmación, se abre una pestaña con un formulario de Mercado Pago. NO completes el pago, solo verificá que se abre el formulario.',
-    seeStr: 'Se abre una pestaña nueva con el logo de Mercado Pago y un formulario para ingresar tarjeta. Esto significa que el cambio de plan funciona correctamente. Cerrá esa pestaña sin completar el pago.',
+    doStr: 'Volvé a tu perfil o a "Planes". Buscá "Cambiar plan", "Mejorar plan" o "Suscribirme" y elegí un plan PAGO que NO tengas actualmente. Ahora el formulario de tarjeta aparece DENTRO de la misma página (ya NO se abre Mercado Pago en otra pestaña). NO completes los datos ni confirmes — solo verificá que aparece el formulario de tarjeta integrado.',
+    seeStr: 'Aparece, en la misma página, un formulario para cargar la tarjeta (número, vencimiento, código de seguridad, titular). NO se abre ninguna pestaña de Mercado Pago. Eso significa que el cambio de plan funciona. Dejalo sin completar. (Nota: si confirmaras, el cobro se hace al instante y el plan se activa sin salir del sitio.)',
   },
   { id: 7, block: 'Tu suscripción', n: 7,
     criticality: 'high',
@@ -966,12 +966,32 @@ function loadState() {
   }
 }
 
+let quotaWarned = false;
 function saveState() {
   state.meta.last_saved_at = new Date().toISOString();
+  var serialized;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    serialized = JSON.stringify(state);
   } catch (e) {
     toast('No se pudo guardar — el archivo está demasiado lleno. Descargá el reporte y empezá de nuevo.', 'err');
+    return;
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, serialized);
+  } catch (e) {
+    toast('No se pudo guardar — el archivo está demasiado lleno. Descargá el reporte y empezá de nuevo.', 'err');
+    return;
+  }
+  // #524: aviso proactivo al acercarse al límite de localStorage (~5MB).
+  // Avisamos una sola vez al cruzar el umbral; se rearma si el uso vuelve a
+  // bajar (p. ej. tras descargar y reiniciar).
+  if (serialized.length > 4000000) {
+    if (!quotaWarned) {
+      quotaWarned = true;
+      toast('El reporte se está llenando de capturas. Descargalo (⬇ Descargar reporte) y empezá de nuevo para no arriesgar perder datos.', 'err');
+    }
+  } else {
+    quotaWarned = false;
   }
 }
 
@@ -1130,7 +1150,7 @@ function handlePaste(e, stepId) {
       found = true;
       e.preventDefault();
       const file = item.getAsFile();
-      readFileAsDataURL(file).then(dataUrl => {
+      compressImage(file).then(dataUrl => {
         state.steps[stepId].images.push(dataUrl);
         saveState();
         rerenderGallery(stepId);
@@ -1143,7 +1163,7 @@ function handlePaste(e, stepId) {
 
 function handleFileUpload(e, stepId) {
   const files = Array.from(e.target.files || []);
-  Promise.all(files.map(readFileAsDataURL)).then(urls => {
+  Promise.all(files.map(function (f) { return compressImage(f); })).then(urls => {
     state.steps[stepId].images.push(...urls);
     saveState();
     rerenderGallery(stepId);
@@ -1158,6 +1178,39 @@ function readFileAsDataURL(file) {
     r.onload = () => resolve(r.result);
     r.onerror = reject;
     r.readAsDataURL(file);
+  });
+}
+
+// #524: comprime/redimensiona imágenes antes de guardarlas en localStorage.
+// Las capturas (PNG) pesan varios MB en base64 y llenan la cuota (~5MB) en
+// pocas. Redimensionamos a máx 1280px (lado mayor) y re-encodeamos a JPEG.
+// Fallbacks: no-imagen / sin dims / canvas falla / "comprimido" más grande
+// → se guarda el original.
+function compressImage(file, maxDim, quality) {
+  maxDim = maxDim || 1280;
+  quality = quality || 0.7;
+  return readFileAsDataURL(file).then(function (dataUrl) {
+    return new Promise(function (resolve) {
+      if (!file.type || file.type.indexOf('image/') !== 0) { resolve(dataUrl); return; }
+      var img = new Image();
+      img.onload = function () {
+        var w = img.naturalWidth, h = img.naturalHeight;
+        if (!w || !h) { resolve(dataUrl); return; }
+        var scale = Math.min(1, maxDim / Math.max(w, h));
+        w = Math.round(w * scale); h = Math.round(h * scale);
+        try {
+          var c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          var out = c.toDataURL('image/jpeg', quality);
+          resolve(out && out.length < dataUrl.length ? out : dataUrl);
+        } catch (err) {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = function () { resolve(dataUrl); };
+      img.src = dataUrl;
+    });
   });
 }
 
