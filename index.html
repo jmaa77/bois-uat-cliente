@@ -757,8 +757,8 @@ const STEPS = [
   { id: 3, block: 'Comenzar a usar la app', n: 3,
     criticality: 'high',
     title: 'Crear tu cuenta',
-    doStr: 'Buscá "Ingresar" o "Crear cuenta" (arriba a la derecha) → "Registrarse". El registro es un asistente por pasos: (1) aceptar Términos y Condiciones, (2) aceptar Privacidad y Cookies, (3) tus datos (correo real, contraseña, nombre, fecha de nacimiento), (4) elegir un plan (Gratis o Plus), (5) "Pagar y suscribirme". Para esta prueba podés elegir el plan GRATIS (no pide tarjeta). Si elegís Plus, la tarjeta se carga ahí mismo, dentro de la misma página. Avanzá con "Continuar" y confirmá al final.',
-    seeStr: 'El registro va paso por paso (botón "Continuar" para avanzar, "Volver" para retroceder). NADA se crea ni se cobra hasta el botón final "Pagar y suscribirme". Al confirmar ves un mensaje tipo "Te enviamos un correo de verificación" (y, si elegiste Gratis, "Tu plan gratuito quedó activado"). Revisá tu casilla de mail (puede caer en spam).',
+    doStr: 'Buscá un botón o link que diga "Ingresar" o "Crear cuenta" (suele estar arriba a la derecha). Clickealo y elegí "Crear cuenta" o "Registrarse". Completá el formulario con tu correo real, una contraseña, etc. Confirmá.',
+    seeStr: 'Vas a ver un mensaje que dice algo así como "Te enviamos un correo de verificación". Revisá tu casilla de mail (puede caer en spam).',
     mockup: 'loginForm',
     mockupCaption: 'El formulario de creación de cuenta',
   },
@@ -785,10 +785,10 @@ const STEPS = [
     mockupCaption: 'Cada prenda se ve aproximadamente así',
   },
   { id: 7, block: 'Explorar el catálogo', n: 7,
-    criticality: 'medium',
-    title: 'Usar los filtros',
-    doStr: 'En la página de búsqueda, fijate si hay opciones de filtro (talle, color, temperatura, precio, categoría). Cambiá al menos uno o dos.',
-    seeStr: 'Los resultados se actualizan automáticamente según el filtro que cambiaste.',
+    criticality: 'high',
+    title: 'Usar los filtros (categorías, eventos, temporadas, colores)',
+    doStr: 'En la página de búsqueda, mirá la columna de filtros (a la izquierda; en celular puede estar detrás del botón ☰). Vas a ver SOLO los filtros que tienen prendas: Categorías, Eventos, Temporadas y Colores. Tildá una o dos opciones (por ejemplo una categoría y un color).',
+    seeStr: 'Los resultados se actualizan solos según lo que tildaste. Importante: solo deberían aparecer filtros que realmente tienen prendas (no opciones vacías), y NO debería haber filtros de talle, precio ni temperatura. Si tildás una categoría Y un color, deberían verse solo las prendas que cumplen las dos cosas a la vez.',
   },
 
   // ----- BLOCK C: INTERACTUAR -----
@@ -851,8 +851,8 @@ const STEPS = [
   { id: 15, block: 'Ver planes y suscripción', n: 15,
     criticality: 'high',
     title: 'Probar de suscribirte (opcional, no es necesario completar el pago)',
-    doStr: 'Clickeá "Suscribirme" o "Suscribirme a Plus". El formulario de tarjeta aparece DENTRO de la misma página (ya NO se abre Mercado Pago en otra pestaña). NO completes los datos ni confirmes — solo verificá que aparece el formulario de tarjeta integrado.',
-    seeStr: 'Aparece, en la misma página, un formulario para cargar la tarjeta (número, vencimiento, código, titular), sin abrir ninguna pestaña de Mercado Pago. Eso indica que la suscripción funciona. Dejalo sin completar. (Si confirmaras, el cobro se hace al instante y el plan se activa sin salir del sitio.)',
+    doStr: 'Clickeá el botón "Suscribirme" o "Suscribirme a Plus". Se abre una nueva pestaña con un formulario de Mercado Pago para ingresar tarjeta. NO completes el pago, solo verificá que se abre el formulario.',
+    seeStr: 'Se abre una pestaña nueva con el logo de Mercado Pago y un formulario para datos de tarjeta. Eso indica que la integración con Mercado Pago funciona. Podés cerrar la pestaña sin pagar.',
   },
 
   // ----- BLOCK F: EXTRA -----
@@ -869,6 +869,26 @@ const STEPS = [
     title: 'Navegar en otro idioma (opcional)',
     doStr: 'Buscá un selector de idioma (suele estar en el footer o en el menú). Cambialo a Inglés o Francés. Mirá si los textos cambian de idioma correctamente.',
     seeStr: 'Los textos visibles (menús, botones, mensajes) cambian al idioma seleccionado. Si ves algunos textos que NO se traducen, anotanos cuáles.',
+  },
+
+  // ----- BLOCK G: BÚSQUEDA Y FILTROS (novedades) -----
+  { id: 18, block: 'Buscar y filtrar (novedades)', n: 18,
+    criticality: 'high',
+    title: 'Ver todo el catálogo con "Ver más"',
+    doStr: 'Andá a la página principal (home). Abajo de las prendas sugeridas, tocá "Ver más". (También podés probarlo sin iniciar sesión, en una ventana de incógnito.)',
+    seeStr: 'Te lleva a la página de búsqueda y se ve el catálogo de prendas disponibles. NO debería aparecer el mensaje "No hay prendas para mostrar con el filtro actual" si hay prendas cargadas: como no aplicaste ningún filtro, tiene que mostrarte lo que haya.',
+  },
+  { id: 19, block: 'Buscar y filtrar (novedades)', n: 19,
+    criticality: 'medium',
+    title: 'Filtrar por color',
+    doStr: 'En la página de búsqueda, en la columna de filtros buscá la sección "Colores". Tildá un color.',
+    seeStr: 'Aparece la lista de colores (cada uno con su muestra de color al lado) y solo se listan colores que tienen prendas. Al tildar uno, los resultados se achican a las prendas de ese color. Destildándolo, vuelven a aparecer todas.',
+  },
+  { id: 20, block: 'Buscar y filtrar (novedades)', n: 20,
+    criticality: 'medium',
+    title: 'Cambiar de búsqueda no arrastra filtros viejos',
+    doStr: 'Hacé una búsqueda y tildá algún filtro. Después hacé una búsqueda distinta (otra palabra) desde la barra de arriba.',
+    seeStr: 'La nueva búsqueda arranca limpia: no quedan tildados los filtros de la búsqueda anterior, y los filtros que se ofrecen corresponden a los resultados nuevos. No deberías ver resultados "fantasma" de la búsqueda previa.',
   },
 ];
 
