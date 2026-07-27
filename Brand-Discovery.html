@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Bois Bourgeois — Brand Discovery</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f4f0e9; --bg-2: #ece7dd; --ink: #1a1714; --ink-2: #2b2622;
+    --muted: #7a716a; --line: #d9d2c5; --line-2: #c7bfae; --paper: #faf7f1;
+    --accent: #b85c3c; --accent-deep: #8e3f24; --accent-soft: #e7c9b8;
+    --good: #4a7a4f; --bad: #a8443a;
+  }
+  *{ box-sizing: border-box; }
+  html, body { margin:0; padding:0; background: var(--bg); }
+  body{ font-family: 'Inter', Helvetica, Arial, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; line-height: 1.5; }
+  a{ color: var(--accent-deep); text-decoration: underline; text-underline-offset: 2px; }
+  a:hover{ color: var(--accent); }
+  .wrap{ max-width: 1080px; margin: 0 auto; padding: 56px 48px 96px 48px; }
+
+  /* HEADER */
+  .topbar{ display:flex; justify-content:space-between; align-items:center; font-family:'JetBrains Mono', monospace; font-size: 13px; color: var(--muted); letter-spacing:.12em; text-transform: uppercase; margin-bottom: 56px; }
+  .topbar .ident{ display:flex; align-items:center; gap:12px; color: var(--ink); }
+  .topbar .ident .dot{ width:10px; height:10px; background: var(--accent); border-radius:50%; }
+  .topbar .ident b{ font-family:'Inter'; font-weight:700; letter-spacing:.16em; font-size:14px; }
+
+  .hero{ border-top: 2px solid var(--ink); padding-top: 36px; margin-bottom: 44px; }
+  .hero .eyebrow{ font-family:'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); letter-spacing:.16em; text-transform: uppercase; margin-bottom: 24px; }
+  .hero h1{ margin: 0 0 24px 0; font-family:'Cormorant Garamond', serif; font-weight: 500; font-size: 92px; line-height: .96; letter-spacing: -0.01em; text-wrap: pretty; }
+  .hero h1 em{ font-style: italic; color: var(--accent); }
+  .hero p{ margin: 0; max-width: 740px; font-size: 20px; line-height: 1.55; color: var(--ink-2); }
+  .hero p b{ color: var(--ink); font-weight: 600; }
+  .hero .meta{ margin-top: 32px; display:flex; gap: 48px; flex-wrap:wrap; font-family:'JetBrains Mono', monospace; font-size: 13px; color: var(--muted); letter-spacing:.08em; }
+  .hero .meta b{ color: var(--ink); font-weight: 500; font-family:'Inter'; letter-spacing:0; }
+
+  /* METHOD NOTE */
+  .method{ background: var(--ink); color: var(--paper); border-left: 8px solid var(--accent); padding: 28px 32px; margin-bottom: 56px; }
+  .method h4{ margin:0 0 10px 0; font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.16em; text-transform:uppercase; color: var(--accent-soft); }
+  .method p{ margin:0 0 14px 0; font-size:16px; line-height:1.55; color: rgba(250,247,241,.82); max-width: 780px; }
+  .method p:last-child{ margin-bottom:0; }
+  .probes{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .probe{ font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.04em; padding:6px 12px; border:1px solid rgba(250,247,241,.28); color: var(--paper); }
+
+  /* PROGRESS */
+  .progress{ position: sticky; top: 0; z-index: 50; background: var(--bg); padding: 16px 0; margin: -16px -48px 48px -48px; padding-left: 48px; padding-right: 48px; border-bottom: 1px solid var(--line); }
+  .progress-bar{ height: 3px; background: var(--line); position: relative; overflow: hidden; }
+  .progress-bar .fill{ position:absolute; left:0; top:0; bottom:0; width: 0%; background: var(--accent); transition: width .3s ease; }
+  .progress-info{ display:flex; justify-content:space-between; align-items:center; margin-top: 10px; font-family:'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+  .progress-info .count{ color: var(--ink); font-weight: 500; }
+
+  /* SECTION CARD */
+  .q{ border-top: 1px solid var(--ink); padding: 48px 0 12px 0; }
+  .q-head{ display:grid; grid-template-columns: 80px 1fr; gap: 24px; margin-bottom: 28px; }
+  .q-num{ font-family:'JetBrains Mono', monospace; font-size: 14px; color: var(--accent); letter-spacing: .12em; padding-top: 18px; }
+  .q-num span{ display:block; font-size:10px; color: var(--muted); letter-spacing:.1em; margin-top:4px; }
+  .q-title{ margin: 0; font-family:'Cormorant Garamond', serif; font-size: 44px; font-weight: 600; line-height: 1.05; letter-spacing: -0.005em; text-wrap: pretty; }
+  .q-sub{ margin: 8px 0 0 0; font-size: 16px; color: var(--muted); line-height: 1.5; max-width: 760px; }
+  .q-sub b{ color: var(--ink-2); font-weight: 600; }
+  .q-body{ grid-column: 2; }
+  .q-help{ margin: 0 0 24px 0; padding: 14px 18px; background: rgba(184, 92, 60, .07); border-left: 3px solid var(--accent); font-size: 14px; color: var(--ink-2); line-height: 1.5; }
+  .q-help b{ color: var(--accent-deep); font-weight: 600; }
+
+  /* FIELDS */
+  .field{ margin-top: 22px; }
+  .field:first-child{ margin-top: 0; }
+  .field label{ display:block; font-family:'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; }
+  .field label b{ color: var(--accent-deep); font-weight:600; }
+  textarea, input[type="text"], input[type="url"]{ width: 100%; border: 1px solid var(--line-2); background: var(--paper); padding: 14px 16px; font-family: 'Inter'; font-size: 16px; color: var(--ink); line-height: 1.5; resize: vertical; transition: border-color .12s; }
+  textarea{ min-height: 84px; }
+  textarea.sm{ min-height: 60px; }
+  textarea:focus, input:focus{ outline: none; border-color: var(--ink); background: #fff; }
+  textarea::placeholder, input::placeholder{ color: var(--muted); font-style: italic; }
+
+  .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap: 22px 20px; }
+
+  /* CHIPS */
+  .chips{ display:flex; flex-wrap:wrap; gap: 8px; }
+  .chip{ position: relative; padding: 8px 14px; border: 1px solid var(--line-2); background: var(--paper); font-size: 14px; color: var(--ink-2); cursor: pointer; transition: all .12s; font-family:'Inter'; }
+  .chip:hover{ border-color: var(--ink); }
+  .chip input{ position:absolute; opacity:0; pointer-events:none; }
+  .chip:has(input:checked){ background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .chips-label{ font-family:'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px; }
+
+  /* PERSONA GRID */
+  .persona{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px 20px; }
+  .persona .cell label{ display:block; font-family:'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+  .persona .cell .qmark{ color: var(--accent); }
+
+  /* FINAL EXERCISE */
+  .fe-intro{ font-size: 16px; color: var(--ink-2); line-height:1.55; max-width: 760px; margin: 0 0 28px 0; }
+  .fe-list{ display:grid; gap: 18px; }
+  .fe{ background: var(--paper); border: 1px solid var(--line-2); border-left: 4px solid var(--accent); padding: 20px 22px; }
+  .fe .prompt{ font-family:'Cormorant Garamond', serif; font-style: italic; font-size: 26px; color: var(--ink); line-height:1.2; margin-bottom: 12px; }
+  .fe textarea{ min-height: 56px; background: var(--bg); }
+
+  /* SEEDS */
+  .seeds{ margin: 12px 0 2px 0; }
+  .seeds-label{ font-family:'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+  .seeds-row{ display:flex; flex-wrap:wrap; gap: 8px; }
+  .seed{ padding: 6px 12px; background: transparent; border: 1px dashed var(--line-2); color: var(--muted); font-size: 13px; cursor: pointer; font-family: 'Inter'; transition: all .12s; }
+  .seed:hover{ border-color: var(--accent); color: var(--accent-deep); border-style: solid; }
+
+  /* ACTIONS / FOOTER */
+  .actions{ margin-top: 64px; padding: 36px 36px 40px 36px; background: var(--ink); color: var(--paper); border-left: 8px solid var(--accent); }
+  .actions h3{ margin: 0 0 8px 0; font-family:'Cormorant Garamond', serif; font-size: 36px; font-weight: 600; letter-spacing: -0.01em; }
+  .actions p{ margin: 0 0 24px 0; color: rgba(250,247,241,.7); font-size: 16px; line-height: 1.5; max-width: 640px; }
+  .actions p b{ color: var(--paper); font-weight: 600; }
+  .btn-row{ display:flex; gap: 12px; flex-wrap:wrap; }
+  .btn{ padding: 14px 22px; font-family: 'Inter'; font-weight: 600; font-size: 15px; border: none; cursor: pointer; letter-spacing: .02em; transition: all .12s; display:inline-flex; align-items:center; gap: 10px; }
+  .btn-primary{ background: var(--accent); color: var(--paper); }
+  .btn-primary:hover{ background: var(--accent-deep); }
+  .btn-ghost{ background: transparent; color: var(--paper); border: 1px solid rgba(250,247,241,.3); }
+  .btn-ghost:hover{ border-color: var(--paper); }
+  .btn .dot{ width:8px; height:8px; border-radius:50%; background: currentColor; opacity:.5; }
+  .toast{ position: fixed; bottom: 32px; right: 32px; background: var(--ink); color: var(--paper); padding: 14px 20px; font-size: 14px; border-left: 4px solid var(--accent); transform: translateY(80px); opacity: 0; transition: all .2s ease; z-index: 100; pointer-events: none; }
+  .toast.show{ transform: translateY(0); opacity: 1; }
+  .save-status{ font-family:'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+  .save-status .ok{ color: var(--good); }
+  .pagefoot{ margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--line); display:flex; justify-content:space-between; font-family:'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+
+  @media (max-width: 720px){
+    .wrap{ padding: 32px 24px 64px 24px; }
+    .hero h1{ font-size: 58px; }
+    .q-head{ grid-template-columns: 1fr; gap: 6px; }
+    .q-body{ grid-column: 1; }
+    .q-num{ padding-top: 0; }
+    .q-title{ font-size: 34px; }
+    .grid2, .persona{ grid-template-columns: 1fr; }
+    .progress{ margin: -16px -24px 32px -24px; padding-left: 24px; padding-right: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="ident"><span class="dot"></span><b>BOIS BOURGEOIS</b></div>
+    <div>BRAND DISCOVERY · ETAPA 1 · 2026</div>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow">Entrevista de marca · Business Owner · ~60–90 minutos</div>
+    <h1>Antes de diseñar nada, <em>descubramos el ADN</em> de Bois.</h1>
+    <p>Esto no es sobre logos ni colores. Es una conversación para entender <b>quiénes somos, para quién existimos, qué problema resolvemos y cómo queremos que nos recuerden</b>. De acá sale la estrategia que después ordena marca, producto, comunicación y todo lo que venga.</p>
+    <div class="meta">
+      <div><b>15</b> secciones + ejercicio final</div>
+      <div><b>Sin login</b> — se guarda en este navegador</div>
+      <div><b>Exportable</b> a JSON al final</div>
+    </div>
+  </div>
+
+  <div class="method">
+    <h4>Cómo usar esta guía</h4>
+    <p>El entrevistador trabaja como <b>Brand Strategist</b>, no como diseñador. Ante cada respuesta, profundizá — no aceptes lo superficial. La primera respuesta rara vez es la verdadera; la tercera empieza a serlo.</p>
+    <p>Repreguntá siempre:</p>
+    <div class="probes">
+      <span class="probe">¿Por qué?</span>
+      <span class="probe">¿Qué significa eso?</span>
+      <span class="probe">¿Un ejemplo concreto?</span>
+      <span class="probe">¿Cómo sabríamos que ocurrió?</span>
+      <span class="probe">¿Qué sentiría el usuario?</span>
+    </div>
+  </div>
+
+  <div class="progress">
+    <div class="progress-bar"><div class="fill" id="pfill"></div></div>
+    <div class="progress-info">
+      <span>Avance de la entrevista</span>
+      <span class="count" id="pcount">0 / 16 secciones</span>
+    </div>
+  </div>
+
+  <form id="disc" autocomplete="off">
+
+    <!-- ============ S1 HISTORIA ============ -->
+    <div class="q" data-sec="1">
+      <div class="q-head">
+        <div class="q-num">01<span>Historia</span></div>
+        <div>
+          <h2 class="q-title">¿De dónde viene Bois?</h2>
+          <p class="q-sub">Objetivo — descubrir el origen real del proyecto, no la versión de marketing.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="q-help">Profundizá: <b>¿por qué justo ese problema? ¿qué viste que otros no veían?</b> Buscá el momento fundacional concreto, no la abstracción.</div>
+        <div class="field"><label>¿Por qué nació Bois? ¿Qué situación lo motivó?</label><textarea name="s1_nacio" placeholder="El origen honesto — qué estaba pasando cuando arrancó."></textarea></div>
+        <div class="field"><label>¿Qué problema del mercado viste, y por qué decidiste resolver ese?</label><textarea name="s1_problema" placeholder="Qué estaba roto / faltaba. Por qué te importó a vos."></textarea></div>
+        <div class="field"><label>¿Qué pasó para que dijeras "esto debería existir"?</label><textarea name="s1_momento" class="sm" placeholder="El disparador concreto."></textarea></div>
+        <div class="field"><label>¿Qué historia querés que la gente conozca sobre la marca?</label><textarea name="s1_relato" class="sm" placeholder="El relato que te gustaría que se cuente."></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============ S2 PROPÓSITO ============ -->
+    <div class="q" data-sec="2">
+      <div class="q-head">
+        <div class="q-num">02<span>Propósito</span></div>
+        <div>
+          <h2 class="q-title">¿Por qué merece existir?</h2>
+          <p class="q-sub">Objetivo — entender la razón de ser más allá de vender.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="q-help">Encuadre potente: <b>si Bois desapareciera mañana…</b> lo que se pierda revela el propósito real.</div>
+        <div class="grid2">
+          <div class="field"><label>…¿qué perdería el mercado?</label><textarea name="s2_mercado" class="sm"></textarea></div>
+          <div class="field"><label>…¿qué perderían los diseñadores?</label><textarea name="s2_disenadores" class="sm"></textarea></div>
+          <div class="field"><label>…¿qué perderían los compradores?</label><textarea name="s2_compradores" class="sm"></textarea></div>
+          <div class="field"><label>¿Qué impacto querés generar?</label><textarea name="s2_impacto" class="sm"></textarea></div>
+        </div>
+        <div class="field"><label>En el fondo · ¿por qué esta empresa merece existir?</label><textarea name="s2_merece" placeholder="La respuesta que queda cuando sacás el negocio de la ecuación."></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============ S3 VISIÓN ============ -->
+    <div class="q" data-sec="3">
+      <div class="q-head">
+        <div class="q-num">03<span>Visión</span></div>
+        <div>
+          <h2 class="q-title">¿A dónde va?</h2>
+          <p class="q-sub">Objetivo — imaginar el futuro con ambición concreta.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="grid2">
+          <div class="field"><label>Bois en <b>5 años</b></label><textarea name="s3_5" class="sm"></textarea></div>
+          <div class="field"><label>Bois en <b>10 años</b></label><textarea name="s3_10" class="sm"></textarea></div>
+        </div>
+        <div class="field"><label>¿Qué lugar querés ocupar en Argentina y en Latinoamérica?</label><textarea name="s3_region" class="sm"></textarea></div>
+        <div class="field"><label>¿Qué titular te gustaría leer en un diario sobre Bois?</label><textarea name="s3_titular" class="sm" placeholder='Escribilo como un titular real.'></textarea>
+          <div class="seeds"><div class="seeds-label">Por si bloquea</div><div class="seeds-row">
+            <button type="button" class="seed" data-seed="s3_titular" data-text="«Cómo una plataforma argentina redefinió lo que significa comprar diseño de autor en Latinoamérica»">Ejemplo A</button>
+            <button type="button" class="seed" data-seed="s3_titular" data-text="«Bois: el lugar donde los diseñadores independientes dejaron de competir con el fast fashion y empezaron a ganar»">Ejemplo B</button>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ S4 MISIÓN ============ -->
+    <div class="q" data-sec="4">
+      <div class="q-head">
+        <div class="q-num">04<span>Misión</span></div>
+        <div>
+          <h2 class="q-title">¿Qué hacemos todos los días?</h2>
+          <p class="q-sub">Objetivo — entender el trabajo cotidiano que acerca a la visión.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="field"><label>¿Qué hacemos a diario para acercarnos a la visión?</label><textarea name="s4_diario" class="sm"></textarea></div>
+        <div class="field"><label>¿Qué hacemos mejor que otros?</label><textarea name="s4_mejor" class="sm"></textarea></div>
+        <div class="field"><label>¿Qué actividades nunca dejaríamos de hacer?</label><textarea name="s4_nunca" class="sm"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============ S5 VALORES ============ -->
+    <div class="q" data-sec="5">
+      <div class="q-head">
+        <div class="q-num">05<span>Valores</span></div>
+        <div>
+          <h2 class="q-title">¿Qué no se negocia?</h2>
+          <p class="q-sub">Objetivo — definir los principios reales de la empresa.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="q-help">Pedí siempre <b>un ejemplo concreto</b>: un valor sin una historia detrás es una palabra decorativa.</div>
+        <div class="field"><label>¿Qué cosas nunca negociarías?</label><textarea name="s5_no_negocia" class="sm"></textarea></div>
+        <div class="grid2">
+          <div class="field"><label>Comportamientos que <b>premiarías</b></label><textarea name="s5_premia" class="sm"></textarea></div>
+          <div class="field"><label>Comportamientos que <b>rechazarías</b></label><textarea name="s5_rechaza" class="sm"></textarea></div>
+        </div>
+        <div class="field"><label>¿Qué tendría que pasar para decir "eso no representa a Bois"? (ejemplo real)</label><textarea name="s5_no_representa" placeholder="Una situación concreta que cruzaría la línea."></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============ S6 DIFERENCIAL ============ -->
+    <div class="q" data-sec="6">
+      <div class="q-head">
+        <div class="q-num">06<span>Diferencial</span></div>
+        <div>
+          <h2 class="q-title">¿Por qué elegirnos?</h2>
+          <p class="q-sub">Objetivo — encontrar el valor agregado real y difícil de copiar.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="field"><label>¿Por qué alguien debería elegir Bois?</label><textarea name="s6_porque" class="sm"></textarea></div>
+        <div class="chips-label">¿Y por qué no comprar directamente en…?</div>
+        <div class="grid2">
+          <div class="field"><label>…MercadoLibre</label><textarea name="s6_ml" class="sm"></textarea></div>
+          <div class="field"><label>…Instagram</label><textarea name="s6_ig" class="sm"></textarea></div>
+          <div class="field"><label>…Zara</label><textarea name="s6_zara" class="sm"></textarea></div>
+          <div class="field"><label>…una tienda física</label><textarea name="s6_fisica" class="sm"></textarea></div>
+        </div>
+        <div class="field"><label>¿Qué ofrecemos que nadie más, y qué hace difícil copiarnos?</label><textarea name="s6_unico"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============ S7 COMPETENCIA ============ -->
+    <div class="q" data-sec="7">
+      <div class="q-head">
+        <div class="q-num">07<span>Competencia</span></div>
+        <div>
+          <h2 class="q-title">¿Contra quién jugamos?</h2>
+          <p class="q-sub">Objetivo — entender el posicionamiento frente al resto.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="grid2">
+          <div class="field"><label>¿Quiénes son nuestros competidores?</label><textarea name="s7_quienes" class="sm"></textarea></div>
+          <div class="field"><label>¿Cuáles admiramos y por qué?</label><textarea name="s7_admira" class="sm"></textarea></div>
+          <div class="field"><label>¿A cuáles NO queremos parecernos?</label><textarea name="s7_no_parecer" class="sm"></textarea></div>
+          <div class="field"><label>¿Qué oportunidad vemos que otros no aprovechan?</label><textarea name="s7_oportunidad" class="sm"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ S8 DISEÑADORES ============ -->
+    <div class="q" data-sec="8">
+      <div class="q-head">
+        <div class="q-num">08<span>Diseñadores</span></div>
+        <div>
+          <h2 class="q-title">¿Quién es el diseñador ideal?</h2>
+          <p class="q-sub">Objetivo — comprender al cliente que vende en la plataforma.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="grid2">
+          <div class="field"><label>¿Quién es el diseñador ideal?</label><textarea name="s8_ideal" class="sm"></textarea></div>
+          <div class="field"><label>¿Qué problemas tiene hoy?</label><textarea name="s8_problemas" class="sm"></textarea></div>
+          <div class="field"><label>¿Qué sueños tiene?</label><textarea name="s8_suenos" class="sm"></textarea></div>
+          <div class="field"><label>¿Qué necesita de nosotros?</label><textarea name="s8_necesita" class="sm"></textarea></div>
+        </div>
+        <div class="field"><label>¿Qué espera sentir usando Bois? ¿Qué lo haría enamorarse de la plataforma?</label><textarea name="s8_enamora"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============ S9 COMPRADORES ============ -->
+    <div class="q" data-sec="9">
+      <div class="q-head">
+        <div class="q-num">09<span>Compradores</span></div>
+        <div>
+          <h2 class="q-title">¿Quién compra en Bois?</h2>
+          <p class="q-sub">Objetivo — comprender al usuario comprador y su vínculo emocional.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="grid2">
+          <div class="field"><label>¿Quién compra y cómo vive?</label><textarea name="s9_quien" class="sm"></textarea></div>
+          <div class="field"><label>¿Qué busca y qué valora?</label><textarea name="s9_busca" class="sm"></textarea></div>
+        </div>
+        <div class="field"><label>¿Qué lo emociona? ¿Qué significa para él/ella vestir una prenda de diseñador?</label><textarea name="s9_emociona"></textarea></div>
+        <div class="field"><label>¿Cómo quiere sentirse cuando compra?</label><textarea name="s9_siente" class="sm"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============ S10 EMOCIONES ============ -->
+    <div class="q" data-sec="10">
+      <div class="q-head">
+        <div class="q-num">10<span>Emociones</span></div>
+        <div>
+          <h2 class="q-title">¿Qué se siente estar acá?</h2>
+          <p class="q-sub">Objetivo — descubrir la identidad emocional a lo largo del recorrido.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="grid2">
+          <div class="field"><label>Al entrar <b>por primera vez</b></label><textarea name="s10_primera" class="sm"></textarea></div>
+          <div class="field"><label>Después de <b>10 minutos</b></label><textarea name="s10_diez" class="sm"></textarea></div>
+          <div class="field"><label>Después de <b>comprar</b></label><textarea name="s10_compra" class="sm"></textarea></div>
+          <div class="field"><label>Emociones que <b>queremos</b> provocar</label><textarea name="s10_provocar" class="sm"></textarea></div>
+        </div>
+        <div class="field"><label style="color:var(--bad)">Emociones que NUNCA queremos provocar</label><textarea name="s10_evitar" class="sm"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============ S11 PERSONALIDAD ============ -->
+    <div class="q" data-sec="11">
+      <div class="q-head">
+        <div class="q-num">11<span>Personalidad</span></div>
+        <div>
+          <h2 class="q-title">Si Bois fuera una persona…</h2>
+          <p class="q-sub">Objetivo — humanizar la marca para hacerla tangible.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="persona">
+          <div class="cell"><label>¿Cuántos <span class="qmark">años</span> tendría?</label><input type="text" name="s11_edad" placeholder="Ej: 34"></div>
+          <div class="cell"><label>¿Cómo <span class="qmark">vestiría</span>?</label><input type="text" name="s11_ropa" placeholder="Ej: sastrería relajada, sin logos"></div>
+          <div class="cell"><label>¿Qué <span class="qmark">música</span> escucharía?</label><input type="text" name="s11_musica"></div>
+          <div class="cell"><label>¿Qué <span class="qmark">lugares</span> frecuentaría?</label><input type="text" name="s11_lugares"></div>
+          <div class="cell"><label>¿Qué <span class="qmark">auto</span> manejaría?</label><input type="text" name="s11_auto"></div>
+          <div class="cell"><label>¿Qué <span class="qmark">libros</span> leería?</label><input type="text" name="s11_libros"></div>
+          <div class="cell"><label>¿Cómo <span class="qmark">hablaría</span>?</label><input type="text" name="s11_habla"></div>
+          <div class="cell"><label>¿Qué <span class="qmark">palabras</span> jamás usaría?</label><input type="text" name="s11_jamas"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ S12 VOZ ============ -->
+    <div class="q" data-sec="12">
+      <div class="q-head">
+        <div class="q-num">12<span>Voz</span></div>
+        <div>
+          <h2 class="q-title">¿Cómo hablamos?</h2>
+          <p class="q-sub">Objetivo — definir la voz en situaciones reales, no en abstracto.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="chips-label">La voz de Bois es… (marcá las que apliquen)</div>
+        <div class="chips" style="margin-bottom:22px;">
+          <label class="chip"><input type="checkbox" name="s12_atributos" value="cercana">Cercana</label>
+          <label class="chip"><input type="checkbox" name="s12_atributos" value="elegante">Elegante</label>
+          <label class="chip"><input type="checkbox" name="s12_atributos" value="divertida">Divertida</label>
+          <label class="chip"><input type="checkbox" name="s12_atributos" value="inspiradora">Inspiradora</label>
+          <label class="chip"><input type="checkbox" name="s12_atributos" value="sobria">Sobria</label>
+          <label class="chip"><input type="checkbox" name="s12_atributos" value="calida">Cálida</label>
+          <label class="chip"><input type="checkbox" name="s12_atributos" value="segura">Segura</label>
+          <label class="chip"><input type="checkbox" name="s12_atributos" value="curatorial">Curatorial</label>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>¿Cómo <b>saludamos</b>?</label><textarea name="s12_saluda" class="sm"></textarea></div>
+          <div class="field"><label>¿Cómo damos una <b>mala noticia</b>?</label><textarea name="s12_mala" class="sm"></textarea></div>
+          <div class="field"><label>¿Cómo <b>felicitamos</b>?</label><textarea name="s12_felicita" class="sm"></textarea></div>
+          <div class="field"><label>¿Cómo respondemos una <b>queja</b>?</label><textarea name="s12_queja" class="sm"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ S13 EXPERIENCIA ============ -->
+    <div class="q" data-sec="13">
+      <div class="q-head">
+        <div class="q-num">13<span>Experiencia</span></div>
+        <div>
+          <h2 class="q-title">¿Qué momentos importan?</h2>
+          <p class="q-sub">Objetivo — construir los principios de experiencia (UX) de la marca.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="grid2">
+          <div class="field"><label>Un diseñador al <b>publicar su primera prenda</b></label><textarea name="s13_publicar" class="sm"></textarea></div>
+          <div class="field"><label>Alguien al <b>descubrir un diseñador nuevo</b></label><textarea name="s13_descubrir" class="sm"></textarea></div>
+          <div class="field"><label>Momentos que deberían generar <b>sorpresa</b></label><textarea name="s13_sorpresa" class="sm"></textarea></div>
+          <div class="field"><label>Momentos que deberían generar <b>orgullo</b></label><textarea name="s13_orgullo" class="sm"></textarea></div>
+        </div>
+        <div class="field"><label>¿Qué experiencia queremos que nadie pueda copiar?</label><textarea name="s13_incopiable"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============ S14 IDENTIDAD VISUAL ============ -->
+    <div class="q" data-sec="14">
+      <div class="q-head">
+        <div class="q-num">14<span>Identidad visual</span></div>
+        <div>
+          <h2 class="q-title">¿Qué significa lo que vemos?</h2>
+          <p class="q-sub">Objetivo — comprender el significado antes de diseñar (no elegir estética todavía).</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="q-help">Acá buscamos <b>el porqué</b>, no la decisión final. "Verde porque transmite calma" vale más que "verde".</div>
+        <div class="grid2">
+          <div class="field"><label>¿Qué colores representan la marca y por qué?</label><textarea name="s14_colores" class="sm"></textarea></div>
+          <div class="field"><label>¿Qué colores jamás usarías?</label><textarea name="s14_no_color" class="sm"></textarea></div>
+          <div class="field"><label>¿Qué marcas tienen una estética que admirás?</label><textarea name="s14_admira" class="sm"></textarea></div>
+          <div class="field"><label>¿Qué estilos visuales NO representan a Bois?</label><textarea name="s14_no_estilo" class="sm"></textarea></div>
+        </div>
+        <div class="field"><label>¿Qué tipo de fotografías representan la esencia de Bois?</label><textarea name="s14_fotos" placeholder="Describí el mundo fotográfico — luz, personas, escenarios, textura."></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============ S15 FUTURO ============ -->
+    <div class="q" data-sec="15">
+      <div class="q-head">
+        <div class="q-num">15<span>Futuro</span></div>
+        <div>
+          <h2 class="q-title">¿Qué más puede ser?</h2>
+          <p class="q-sub">Objetivo — construir una marca escalable más allá del marketplace.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="field"><label>Si en 10 años Bois ya no fuera solo un marketplace, ¿qué más podría ser?</label><textarea name="s15_mas" placeholder="¿Una revista? ¿Una comunidad? ¿Una academia? ¿Una plataforma internacional? ¿Todo a la vez?"></textarea></div>
+        <div class="field"><label>Más allá del negocio · ¿qué sueño tiene la marca?</label><textarea name="s15_sueno" class="sm"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============ FINAL EXERCISE ============ -->
+    <div class="q" data-sec="16">
+      <div class="q-head">
+        <div class="q-num">★<span>Cierre</span></div>
+        <div>
+          <h2 class="q-title">Completá sin pensar.</h2>
+          <p class="q-sub">Objetivo — sintetizar todo en frases espontáneas. Respondé rápido, por instinto.</p>
+        </div>
+      </div>
+      <div class="q-body">
+        <p class="fe-intro">Este es el ejercicio más importante. <b>No lo pienses</b>: escribí la primera reacción honesta. Estas frases se vuelven el filtro con el que después juzgaremos cada decisión de diseño y comunicación.</p>
+        <div class="fe-list">
+          <div class="fe"><div class="prompt">"Bois Bourgeois existe para…"</div><textarea name="fe_existe" class="sm"></textarea></div>
+          <div class="fe"><div class="prompt">"Nunca seremos…"</div><textarea name="fe_nunca" class="sm"></textarea></div>
+          <div class="fe"><div class="prompt">"Siempre seremos…"</div><textarea name="fe_siempre" class="sm"></textarea></div>
+          <div class="fe"><div class="prompt">"Queremos que nuestros diseñadores sientan…"</div><textarea name="fe_disenadores" class="sm"></textarea></div>
+          <div class="fe"><div class="prompt">"Queremos que nuestros compradores sientan…"</div><textarea name="fe_compradores" class="sm"></textarea></div>
+          <div class="fe"><div class="prompt">"Cuando alguien piense en Bois, queremos que piense en…"</div><textarea name="fe_piensen" class="sm"></textarea></div>
+          <div class="fe"><div class="prompt">"Dentro de diez años quiero que Bois sea recordada como…"</div><textarea name="fe_recordada" class="sm"></textarea></div>
+          <div class="fe"><div class="prompt">"Si tuviera que resumir la marca en una sola frase sería…"</div><textarea name="fe_frase" class="sm"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ACTIONS ============ -->
+    <div class="actions">
+      <h3>Listo · ¿qué hacemos con esto?</h3>
+      <p>Las respuestas se guardan automáticamente <b>solo en este navegador</b>. Cuando termines, exportá el JSON con todo y mandámelo — de ahí sale el documento estratégico (ADN, arquetipo, posicionamiento, principios de experiencia y moodboards).</p>
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary" id="btn-download"><span class="dot"></span>Descargar JSON</button>
+        <button type="button" class="btn btn-ghost" id="btn-copy">Copiar al portapapeles</button>
+        <button type="button" class="btn btn-ghost" id="btn-clear">Borrar respuestas</button>
+      </div>
+      <div class="save-status" style="margin-top: 18px;" id="save-status">Auto-guardado · <span class="ok">activo</span></div>
+    </div>
+  </form>
+
+  <div class="pagefoot">
+    <span>AutomateIA · José Manuel Almada · para Bois Bourgeois</span>
+    <span>Brand Discovery · Etapa 1 · 2026</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var STORAGE_KEY = 'bois_brand_discovery_v1';
+  var TOTAL = 16;
+  var form = document.getElementById('disc');
+
+  // SEEDS
+  document.querySelectorAll('button.seed[data-seed]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var name = btn.getAttribute('data-seed');
+      var text = btn.getAttribute('data-text') || '';
+      var target = form.querySelector('[name="' + name + '"]');
+      if(target){ target.value = text; target.focus(); target.dispatchEvent(new Event('input', {bubbles:true})); }
+    });
+  });
+
+  function readAll(){
+    var data = {}; var els = form.elements;
+    for(var i=0;i<els.length;i++){
+      var el = els[i]; if(!el.name) continue;
+      if(el.type==='checkbox'){ if(!data[el.name]) data[el.name]=[]; if(el.checked) data[el.name].push(el.value); }
+      else if(el.type==='radio'){ if(el.checked) data[el.name]=el.value; }
+      else { data[el.name]=el.value; }
+    }
+    return data;
+  }
+  function writeAll(data){
+    if(!data) return; var els = form.elements;
+    for(var i=0;i<els.length;i++){
+      var el = els[i]; if(!el.name) continue;
+      if(el.type==='checkbox'){ var arr=data[el.name]||[]; el.checked=arr.indexOf(el.value)>=0; }
+      else if(el.type==='radio'){ el.checked=data[el.name]===el.value; }
+      else if(typeof data[el.name]!=='undefined'){ el.value=data[el.name]; }
+    }
+  }
+  function hasValue(v){ if(Array.isArray(v)) return v.length>0; return (v||'').toString().trim().length>0; }
+  function sectionAnswered(n, data){
+    var prefix = (n===16) ? 'fe_' : ('s'+n+'_');
+    for(var k in data){ if(k.indexOf(prefix)===0 && hasValue(data[k])) return true; }
+    return false;
+  }
+  function updateProgress(data){
+    data = data || readAll();
+    var n=0; for(var i=1;i<=TOTAL;i++){ if(sectionAnswered(i,data)) n++; }
+    document.getElementById('pcount').textContent = n+' / '+TOTAL+' secciones';
+    document.getElementById('pfill').style.width = (n/TOTAL*100)+'%';
+  }
+  function save(){ try{ var d=readAll(); d.__updated_at=new Date().toISOString(); localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); updateProgress(d); }catch(e){} }
+  function restore(){ try{ var raw=localStorage.getItem(STORAGE_KEY); if(!raw) return; var d=JSON.parse(raw); writeAll(d); updateProgress(d); }catch(e){} }
+
+  form.addEventListener('input', save);
+  form.addEventListener('change', save);
+
+  function toast(msg){ var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(function(){ el.classList.remove('show'); },2200); }
+
+  document.getElementById('btn-download').addEventListener('click', function(){
+    var d=readAll(); d.__brand='Bois Bourgeois — Brand Discovery'; d.__exported_at=new Date().toISOString();
+    var blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='bois-brand-discovery.json'; a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); },1000); toast('JSON descargado');
+  });
+  document.getElementById('btn-copy').addEventListener('click', function(){
+    var txt=JSON.stringify(readAll(),null,2);
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){toast('Copiado al portapapeles');},function(){fallbackCopy(txt);}); }
+    else{ fallbackCopy(txt); }
+  });
+  function fallbackCopy(text){ var ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); toast('Copiado al portapapeles'); }catch(e){ toast('No se pudo copiar — descargá el JSON'); } document.body.removeChild(ta); }
+  document.getElementById('btn-clear').addEventListener('click', function(){
+    if(!confirm('¿Borrar todas las respuestas? Esta acción no se puede deshacer.')) return;
+    localStorage.removeItem(STORAGE_KEY); form.reset(); updateProgress({}); toast('Respuestas borradas');
+  });
+
+  restore();
+  updateProgress();
+})();
+</script>
+
+</body>
+</html>
